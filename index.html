@@ -13,6 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- SDK Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -42,6 +43,7 @@
 <body class="h-screen flex flex-col overflow-hidden relative">
 
     <div id="toast-container"></div>
+    
     <!-- DANH MỤC GỢI Ý (SMART INPUT) -->
     <datalist id="task-templates">
         <option value="Dạy học theo Phân phối chương trình">
@@ -66,11 +68,16 @@
             </div>
             <h2 class="text-3xl font-black text-center text-slate-800 mb-1">KPI PORTAL</h2>
             <div class="text-center mb-6"><span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md border border-slate-200">PTDTNT THCS & THPT Đắk Song</span></div>
-            <div id="cloud-status" class="text-center mb-6 text-xs font-bold text-amber-600"><i class="fas fa-sync fa-spin"></i> Đang kết nối máy chủ Đám mây...</div>
+            
+            <!-- Trạng thái Đám mây -->
+            <div id="cloud-status" class="text-center mb-6 text-sm font-bold text-amber-600">
+                <i class="fas fa-sync fa-spin"></i> Đang kết nối máy chủ Đám mây...
+            </div>
+            
             <form id="login-form" class="space-y-5">
                 <div><label class="block text-xs font-bold text-slate-500 mb-1.5">Tên đăng nhập</label><input type="text" id="username" required class="table-input" placeholder="Nhập tài khoản..."></div>
                 <div><label class="block text-xs font-bold text-slate-500 mb-1.5">Mật khẩu</label><input type="password" id="password" required class="table-input" placeholder="••••••••"></div>
-                <button type="submit" id="btn-login" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 px-4 rounded-xl cursor-not-allowed">ĐĂNG NHẬP</button>
+                <button type="submit" id="btn-login" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 px-4 rounded-xl cursor-not-allowed transition-all">ĐĂNG NHẬP</button>
             </form>
         </div>
     </div>
@@ -260,17 +267,31 @@
         </div>
     </div>
 
-    <!-- SCRIPT TỔNG HỢP -->
+    <!-- SCRIPT TỔNG HỢP (ĐÃ THÊM TÍNH NĂNG BẮT LỖI) -->
     <script type="text/javascript">
-        // 1. FIREBASE CONFIG
-        const firebaseConfig = { apiKey: "AIzaSyBQ674rvyTsjbPBNMXscVE1LFY3uo1Neaw", authDomain: "class-rank-noi-tru-dak-song.firebaseapp.com", projectId: "class-rank-noi-tru-dak-song", storageBucket: "class-rank-noi-tru-dak-song.firebasestorage.app", messagingSenderId: "1087793103334", appId: "1:1087793103334:web:0c813d1d241f03529d1627" };
+        // 1. FIREBASE CONFIG THẬT CỦA TRƯỜNG ĐẮK SONG
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBQ674rvyTsjbPBNMXscVE1LFY3uo1Neaw", 
+            authDomain: "class-rank-noi-tru-dak-song.firebaseapp.com", 
+            projectId: "class-rank-noi-tru-dak-song", 
+            storageBucket: "class-rank-noi-tru-dak-song.firebasestorage.app", 
+            messagingSenderId: "1087793103334", 
+            appId: "1:1087793103334:web:0c813d1d241f03529d1627",
+            measurementId: "G-HZ6Z7TF729"
+        };
         const basePath = ['artifacts', 'kpi-app-daksong', 'public', 'data'];
 
-        // 2. GAS URL 
+        // 2. GAS URL CHO CHỨC NĂNG MINH CHỨNG DRIVE
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwXSEJWFSfcpNhYFvLqd5AoTTKdpLKT9ulE_sPh5oyHq7CalRbxbYo2q2zyazwDuQU69w/exec";
 
         let app, db, auth;
-        try { app = firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); } catch(e){}
+        try { 
+            app = firebase.initializeApp(firebaseConfig); 
+            db = firebase.firestore(); 
+            auth = firebase.auth(); 
+        } catch(e) {
+            console.error("Lỗi khởi tạo Firebase:", e);
+        }
         
         const signInAnonymously = (a) => a.signInAnonymously();
         const doc = (d, ...paths) => paths.length > 0 ? d.doc(paths.join('/')) : d.doc();
@@ -297,19 +318,38 @@
         }
         function removeToast(toast) { if(toast) { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); } }
 
+        // === HÀM KHỞI TẠO CÓ TÍNH NĂNG BẮT LỖI ĐỎ ===
         function initCloudAndSync() {
+            if (!auth) { 
+                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-times text-red-500"></i> Lỗi khởi tạo hệ thống!'; 
+                return; 
+            }
             signInAnonymously(auth).then(() => {
                 onSnapshot(collection(db, ...basePath, 'users'), (snap) => {
-                    if (snap.empty) { const adminUser = { id: 'admin1', username: 'admin', password: '1', role: 'admin', fullName: 'Quản trị viên', jobTitle: 'Admin', dept: 'BGH', email: '' }; setDoc(doc(db, ...basePath, 'users', adminUser.id), adminUser); } 
-                    else { allUsers = snap.docs.map(d => ({ ...d.data(), id: d.id })); if(document.getElementById('view-admin').classList.contains('block')) renderUsersTable(); if(currentUser && (currentUser.role === 'tt' || currentUser.role === 'bgh')) populateManagerFilter(); }
+                    if (snap.empty) { 
+                        const adminUser = { id: 'admin1', username: 'admin', password: '1', role: 'admin', fullName: 'Quản trị viên', jobTitle: 'Admin', dept: 'BGH', email: '' }; 
+                        setDoc(doc(db, ...basePath, 'users', adminUser.id), adminUser); 
+                    } 
+                    else { 
+                        allUsers = snap.docs.map(d => ({ ...d.data(), id: d.id })); 
+                        if(document.getElementById('view-admin').classList.contains('block')) renderUsersTable(); 
+                        if(currentUser && (currentUser.role === 'tt' || currentUser.role === 'bgh')) populateManagerFilter(); 
+                    }
                 });
                 onSnapshot(doc(db, ...basePath, 'config', 'departments'), (snap) => {
-                    if (snap.exists) departments = snap.data().list || []; else { departments = ["Ban Giám Hiệu", "Tổ Toán - Lý - Tin", "Tổ Văn - Sử - Địa", "Tổ Hóa - Sinh", "Tổ Ngoại ngữ - QPAN", "Tổ Văn phòng"]; setDoc(doc(db, ...basePath, 'config', 'departments'), { list: departments }); }
+                    if (snap.exists) departments = snap.data().list || []; 
+                    else { 
+                        departments = ["Ban Giám Hiệu", "Tổ Toán - Lý - Tin", "Tổ Văn - Sử - Địa", "Tổ Hóa - Sinh", "Tổ Ngoại ngữ - QPAN", "Tổ Văn phòng"]; 
+                        setDoc(doc(db, ...basePath, 'config', 'departments'), { list: departments }); 
+                    }
                     renderDepartments();
                 });
                 document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-emerald-500"></i> Đã kết nối!';
                 document.getElementById('btn-login').disabled = false;
-                document.getElementById('btn-login').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg cursor-pointer";
+                document.getElementById('btn-login').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg cursor-pointer transition-all";
+            }).catch(error => {
+                document.getElementById('cloud-status').innerHTML = `<i class="fas fa-exclamation-triangle text-red-600"></i> Lỗi máy chủ: ${error.message}`;
+                console.error("Firebase Auth Error: ", error);
             });
         }
         window.onload = function() { setTimeout(initCloudAndSync, 500); };
@@ -451,7 +491,7 @@
                 const scoreA = baseScore * (task.completion / 100); const scoreB = Math.max(0, baseScore * (1 - (0.05 * task.errorCount))); const scoreC = Math.max(0, baseScore * (1 - (0.05 * task.delayDays)));
                 const actualScore = (scoreA + scoreB + scoreC) / 3;
 
-                let proofHTML = task.evidenceUrl ? `<a href="${task.evidenceUrl}" target="_blank" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold w-full flex justify-center"><i class="fas fa-eye mr-1"></i> Xem file</a>` : (canEdit && task.completedDate ? `<button onclick="uploadEvidence('${task.id}')" class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold w-full text-slate-700 hover:bg-slate-300 transition"><i class="fas fa-upload text-blue-600 mr-1"></i> Up file</button>` : `<span class="text-xs text-slate-400">---</span>`);
+                let proofHTML = task.evidenceUrl ? `<a href="${task.evidenceUrl}" target="_blank" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold w-full flex justify-center hover:bg-blue-200 transition"><i class="fas fa-eye mr-1 mt-0.5"></i> Xem file</a>` : (canEdit && task.completedDate ? `<button onclick="uploadEvidence('${task.id}')" class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold w-full text-slate-700 hover:bg-slate-300 transition"><i class="fas fa-upload text-blue-600 mr-1"></i> Up file</button>` : `<span class="text-xs text-slate-400">---</span>`);
                 let actionHTML = !task.completedDate ? `<button onclick="markCompleted('${task.id}')" class="${canEdit?'bg-blue-100 text-blue-700 hover:bg-blue-200 transition border border-blue-200':'bg-slate-100 text-slate-300'} px-2 py-1 rounded text-[10px] font-bold w-full" ${!canEdit?'disabled':''}><i class="fas fa-check"></i> Xác nhận Xong</button>` : `<div class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-1 rounded text-center">Đã chốt: ${new Date(task.completedDate).toLocaleDateString('vi-VN')}</div>`;
 
                 const tr = document.createElement('tr');
@@ -548,6 +588,7 @@
 
         function exportPhuLuc3Excel() { showToast("Tính năng xuất Excel Phụ lục III cần lấy toàn bộ dữ liệu Tổ. Sẽ có ở bản cập nhật nâng cao kế tiếp.", "info"); }
 
+        // XUẤT FILE WORD CHUẨN THỂ THỨC HÀNH CHÍNH
         function exportWordReport() {
             if(!viewingUserObj || tasks.length === 0) return showToast("Không có dữ liệu để xuất!", "warning");
             showToast("Đang tạo file Word Phụ lục II chuẩn hành chính...", "info", true);
@@ -737,4 +778,21 @@
             const tbody = document.getElementById('users-table-body'); if(!tbody) return; tbody.innerHTML = '';
             allUsers.forEach(u => {
                 let rBadge = u.role==='admin' ? '<span class="badge bg-slate-800 text-white">Admin</span>' : (u.role==='bgh' ? '<span class="badge bg-indigo-100 text-indigo-800">BGH</span>' : (u.role==='tt' ? '<span class="badge bg-amber-100 text-amber-800">Tổ trưởng</span>' : '<span class="badge bg-blue-100 text-blue-800">Giáo viên</span>'));
-                tbody.innerHTML += `<tr class="border-b border-slate-100"><td class="p-4 font-bold text-slate-800">${u.fullName} <span class="block text-xs text-slate-500">${u.jobTitle || ''}</span></td><td class="p-4 font-mono text-blue-600 bg-blue-50/30">${u.username} <span class="text-slate-400 text-xs block mt-1"><i class="fas fa-key"></i> ${u.password}</span></td><td class="p-4">${rBadge} <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded ml-1 border border-emerald-100">${u.dept}</span></td>
+                tbody.innerHTML += `<tr class="border-b border-slate-100"><td class="p-4 font-bold text-slate-800">${u.fullName} <span class="block text-xs text-slate-500">${u.jobTitle || ''}</span></td><td class="p-4 font-mono text-blue-600 bg-blue-50/30">${u.username} <span class="text-slate-400 text-xs block mt-1"><i class="fas fa-key"></i> ${u.password}</span></td><td class="p-4">${rBadge} <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded ml-1 border border-emerald-100">${u.dept}</span></td><td class="p-4 text-xs font-semibold text-slate-500">${u.email || '---'}</td><td class="p-4 text-center"><button onclick="editUser('${u.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition"><i class="fas fa-edit"></i></button> <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition ml-1"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        }
+        async function saveUser(e) {
+            e.preventDefault(); const id = document.getElementById('edit-user-id').value || 'u_' + Date.now();
+            const data = { id: id, fullName: document.getElementById('user-fullname').value.trim(), jobTitle: document.getElementById('user-job-title').value.trim(), role: document.getElementById('user-role').value, dept: document.getElementById('user-dept').value, username: document.getElementById('user-username').value.trim(), password: document.getElementById('user-password').value.trim(), email: document.getElementById('user-email').value.trim() };
+            if(data.role !== 'admin' && !data.dept) return showToast("Vui lòng chọn Tổ!", "warning");
+            try { await setDoc(doc(db, ...basePath, 'users', id), data); showToast("Đã lưu tài khoản!"); resetUserForm(); } catch(err) { showToast("Lỗi!", "error"); }
+        }
+        function editUser(id) {
+            const u = allUsers.find(x => x.id === id); if(!u) return;
+            document.getElementById('edit-user-id').value = u.id; document.getElementById('user-fullname').value = u.fullName; document.getElementById('user-job-title').value = u.jobTitle || ''; document.getElementById('user-role').value = u.role; document.getElementById('user-dept').value = u.dept || ''; document.getElementById('user-username').value = u.username; document.getElementById('user-password').value = u.password; document.getElementById('user-email').value = u.email || '';
+        }
+        async function deleteUser(id) { if(confirm("Xóa người dùng này?")) { try { await deleteDoc(doc(db, ...basePath, 'users', id)); showToast("Đã xóa"); } catch(e) { showToast("Lỗi", "error"); } } }
+        function resetUserForm() { document.getElementById('user-form').reset(); document.getElementById('edit-user-id').value = ''; }
+    </script>
+</body>
+</html>
