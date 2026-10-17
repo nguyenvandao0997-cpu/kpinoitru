@@ -42,8 +42,8 @@
 <body class="h-screen flex flex-col overflow-hidden relative">
 
     <div id="toast-container"></div>
+    <!-- DANH MỤC GỢI Ý (SMART INPUT) -->
     <datalist id="task-templates">
-        <!-- Danh mục nhiệm vụ mẫu đặc thù -->
         <option value="Dạy học theo Phân phối chương trình">
         <option value="Công tác Chủ nhiệm lớp">
         <option value="Quản lý học sinh nội trú ngoài giờ lên lớp">
@@ -57,7 +57,7 @@
     </datalist>
 
     <!-- MÀN HÌNH ĐĂNG NHẬP -->
-    <div id="login-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900 p-4 transition-opacity duration-500">
+    <div id="login-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900 p-4 transition-opacity duration-500 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col p-8 border-t-8 border-blue-600 relative">
             <div class="flex justify-center mb-6">
                 <div class="w-24 h-24 relative flex items-center justify-center bg-white rounded-full border-4 border-slate-100 shadow-md p-1">
@@ -85,7 +85,8 @@
                     <div><h1 class="text-xl font-black text-blue-400">KPI PORTAL <span class="text-white text-sm">| Đắk Song</span></h1><p class="text-[11px] text-slate-400 uppercase font-semibold">Hệ thống Đánh giá Hiệu suất</p></div>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button id="nav-admin" onclick="switchView('admin')" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-bold border border-slate-700"><i class="fas fa-users-cog mr-1"></i> Quản lý</button>
+                    <button id="nav-admin" onclick="switchView('admin')" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-bold border border-slate-700"><i class="fas fa-users-cog mr-1"></i> Quản lý User</button>
+                    <button id="nav-dashboard" onclick="switchView('dashboard')" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-bold border border-slate-700"><i class="fas fa-home mr-1"></i> Trang chủ KPI</button>
                     <div class="text-right hidden sm:block">
                         <p class="text-sm font-bold text-white" id="user-display-name">...</p>
                         <p class="text-xs text-emerald-400 font-semibold" id="user-role-name">...</p>
@@ -98,7 +99,7 @@
         <!-- MAIN WORKSPACE -->
         <main class="flex-grow overflow-y-auto no-scrollbar p-4 sm:p-6 pb-24 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" id="main-content">
             
-            <!-- VIEW DASHBOARD -->
+            <!-- VIEW DASHBOARD (ĐÁNH GIÁ KPI) -->
             <div id="view-dashboard" class="max-w-[1600px] mx-auto space-y-6">
                 <!-- BỘ LỌC QUẢN LÝ -->
                 <div id="manager-filter-bar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center gap-4">
@@ -149,7 +150,6 @@
 
                 <!-- TỔNG HỢP VÀ ACTION -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- TỔNG ĐIỂM -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
                         <div class="p-4 border-b border-slate-200 bg-slate-50"><h3 class="font-black text-slate-800 text-lg"><i class="fas fa-calculator text-blue-600"></i> II. TỔNG ĐIỂM ĐÁNH GIÁ</h3></div>
                         <div class="p-6 space-y-5 flex-grow">
@@ -179,7 +179,7 @@
                         </div>
                         <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between">
                             <button id="btn-export-phuluc3" onclick="exportPhuLuc3Excel()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold shadow transition items-center gap-2">
-                                <i class="fas fa-table"></i> BGH/TT: Xuất Phụ lục III
+                                <i class="fas fa-table"></i> Xuất Phụ lục III
                             </button>
                             <button onclick="exportWordReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow transition ml-auto flex items-center gap-2">
                                 <i class="fas fa-file-word"></i> Xuất Phiếu In (PL II)
@@ -187,7 +187,6 @@
                         </div>
                     </div>
 
-                    <!-- KẾT QUẢ & ACTION -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col p-8 relative">
                         <div class="flex-grow flex flex-col justify-center items-center text-center space-y-4 mb-6">
                             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="rating-label">Mức xếp loại tự động</p>
@@ -198,71 +197,91 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- (Giấu View Admin để tối ưu không gian hiển thị text) -->
-            <div id="view-admin" class="hidden">Vui lòng xem mã Admin ở bản trước, tôi giữ nguyên hệ thống Admin.</div>
+
+            <!-- VIEW QUẢN TRỊ ADMIN -->
+            <div id="view-admin" class="hidden max-w-[1600px] mx-auto space-y-8">
+                <!-- TẠO TỔ CHUYÊN MÔN -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8 border-t-8 border-emerald-600">
+                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-4"><i class="fas fa-sitemap text-emerald-600"></i> QUẢN LÝ TỔ / BỘ PHẬN</h2>
+                    <p class="text-sm text-slate-500 font-semibold mb-6">Thêm các Tổ/Phòng ban trong nhà trường để gán cho Giáo viên khi tạo tài khoản.</p>
+                    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                        <input type="text" id="new-dept-name" class="table-input font-bold bg-slate-50 focus:bg-white text-base" placeholder="Nhập tên Tổ mới...">
+                        <button onclick="addDepartment()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg font-bold shadow-md transition whitespace-nowrap"><i class="fas fa-plus mr-2"></i> Thêm Tổ</button>
+                    </div>
+                    <div class="flex flex-wrap gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl min-h-[80px]" id="dept-list-container"></div>
+                </div>
+
+                <!-- QUẢN LÝ TÀI KHOẢN -->
+                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8 border-t-8 border-blue-800">
+                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-6"><i class="fas fa-users-cog text-blue-600"></i> TẠO & QUẢN LÝ TÀI KHOẢN</h2>
+                    <form id="user-form" onsubmit="saveUser(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 bg-slate-50 p-6 rounded-xl border border-slate-200 mb-8">
+                        <input type="hidden" id="edit-user-id" value="">
+                        <div class="md:col-span-2 lg:col-span-2"><label class="block text-sm font-bold text-slate-700 mb-2">Họ và tên người dùng <span class="text-red-500">*</span></label><input type="text" id="user-fullname" required class="table-input font-bold" placeholder="VD: Nguyễn Văn Đạo"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Chức vụ <span class="text-red-500">*</span></label><input type="text" id="user-job-title" required class="table-input font-bold text-blue-700 bg-blue-50" placeholder="VD: Phó Hiệu trưởng..."></div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Vai trò Hệ thống <span class="text-red-500">*</span></label>
+                            <select id="user-role" required class="table-input font-bold text-slate-700"><option value="gv">Giáo viên / Nhân viên</option><option value="tt">Tổ trưởng</option><option value="bgh">Ban Giám Hiệu</option><option value="admin">Quản trị viên</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Trực thuộc Tổ <span class="text-red-500">*</span></label>
+                            <select id="user-dept" required class="table-input font-bold text-emerald-800 bg-emerald-50"><option value="">-- Tạo Tổ trước --</option></select>
+                        </div>
+                        <div class="hidden lg:block"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Tên đăng nhập <span class="text-red-500">*</span></label><input type="text" id="user-username" required class="table-input font-mono text-slate-700" placeholder="Viết liền không dấu..."></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Mật khẩu <span class="text-red-500">*</span></label><input type="text" id="user-password" required class="table-input font-mono text-slate-700" value="123456"></div>
+                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Email (Thông báo Deadline)</label><input type="email" id="user-email" class="table-input text-blue-700" placeholder="example@gmail.com"></div>
+                        <div class="md:col-span-2 lg:col-span-3 flex justify-end gap-3 mt-4 border-t border-slate-200 pt-5">
+                            <button type="button" onclick="resetUserForm()" class="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">Hủy</button>
+                            <button type="submit" class="px-8 py-2.5 bg-blue-800 text-white font-bold rounded-lg shadow-md hover:bg-blue-900 transition flex items-center gap-2"><i class="fas fa-save"></i> LƯU TÀI KHOẢN</button>
+                        </div>
+                    </form>
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
+                        <table class="w-full text-sm text-left"><thead class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider"><tr><th class="p-4">Họ và tên</th><th class="p-4">Tài khoản (Pass)</th><th class="p-4">Vai trò / Tổ</th><th class="p-4">Email</th><th class="p-4 text-center">Thao tác</th></tr></thead><tbody id="users-table-body" class="divide-y divide-slate-100 bg-white"></tbody></table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <!-- MODAL 30 ĐIỂM TIÊU CHÍ CHUNG -->
     <div id="modal-30pts" class="hidden fixed inset-0 z-[200] flex items-center justify-center modal-overlay p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
-            <div class="bg-blue-900 p-4 text-white flex justify-between items-center">
-                <h3 class="font-black text-lg"><i class="fas fa-clipboard-check mr-2"></i> BẢNG ĐÁNH GIÁ TIÊU CHÍ CHUNG</h3>
-                <button onclick="close30PtsModal()" class="hover:text-red-300"><i class="fas fa-times text-xl"></i></button>
-            </div>
+            <div class="bg-blue-900 p-4 text-white flex justify-between items-center"><h3 class="font-black text-lg"><i class="fas fa-clipboard-check mr-2"></i> BẢNG ĐÁNH GIÁ TIÊU CHÍ CHUNG</h3><button onclick="close30PtsModal()" class="hover:text-red-300"><i class="fas fa-times text-xl"></i></button></div>
             <div class="p-6 space-y-4 bg-slate-50">
-                <p class="text-xs font-bold text-slate-500 mb-2 text-center">Căn cứ Quy định 255-QĐ/TU của Tỉnh ủy. Giáo viên/Quản lý tự đánh giá và Tổ trưởng phê duyệt.</p>
-                
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
-                    <div><div class="font-bold text-slate-800 text-sm">1. Tư tưởng chính trị</div><div class="text-[10px] text-slate-400">Chấp hành chủ trương, đường lối...</div></div>
-                    <div class="flex items-center gap-2"><input type="number" id="tc1" min="0" max="5" value="5" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 5đ</span></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
-                    <div><div class="font-bold text-slate-800 text-sm">2. Đạo đức, lối sống</div><div class="text-[10px] text-slate-400">Không tham nhũng, đoàn kết nội bộ...</div></div>
-                    <div class="flex items-center gap-2"><input type="number" id="tc2" min="0" max="5" value="5" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 5đ</span></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
-                    <div><div class="font-bold text-slate-800 text-sm">3. Tác phong, lề lối làm việc</div><div class="text-[10px] text-slate-400">Trách nhiệm, tận tụy, phối hợp tốt...</div></div>
-                    <div class="flex items-center gap-2"><input type="number" id="tc3" min="0" max="10" value="10" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 10đ</span></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
-                    <div><div class="font-bold text-slate-800 text-sm">4. Ý thức tổ chức kỷ luật</div><div class="text-[10px] text-slate-400">Giờ giấc, nội quy cơ quan, báo cáo...</div></div>
-                    <div class="flex items-center gap-2"><input type="number" id="tc4" min="0" max="10" value="10" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 10đ</span></div>
-                </div>
-                
-                <div class="flex justify-between items-center p-4 bg-blue-100 rounded-xl border border-blue-300">
-                    <span class="font-black text-blue-900 uppercase">TỔNG ĐIỂM CƠ BẢN</span>
-                    <span id="tc-total" class="font-black text-2xl text-blue-700">30</span>
-                </div>
+                <p class="text-xs font-bold text-slate-500 mb-2 text-center">Căn cứ Quy định 255-QĐ/TU của Tỉnh ủy.</p>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">1. Tư tưởng chính trị</div><div class="text-[10px] text-slate-400">Chấp hành chủ trương...</div></div><div class="flex items-center gap-2"><input type="number" id="tc1" min="0" max="5" value="5" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 5đ</span></div></div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">2. Đạo đức, lối sống</div><div class="text-[10px] text-slate-400">Đoàn kết nội bộ...</div></div><div class="flex items-center gap-2"><input type="number" id="tc2" min="0" max="5" value="5" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 5đ</span></div></div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">3. Tác phong, lề lối làm việc</div><div class="text-[10px] text-slate-400">Trách nhiệm, phối hợp tốt...</div></div><div class="flex items-center gap-2"><input type="number" id="tc3" min="0" max="10" value="10" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 10đ</span></div></div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">4. Ý thức tổ chức kỷ luật</div><div class="text-[10px] text-slate-400">Giờ giấc, nội quy...</div></div><div class="flex items-center gap-2"><input type="number" id="tc4" min="0" max="10" value="10" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 10đ</span></div></div>
+                <div class="flex justify-between items-center p-4 bg-blue-100 rounded-xl border border-blue-300"><span class="font-black text-blue-900 uppercase">TỔNG ĐIỂM CƠ BẢN</span><span id="tc-total" class="font-black text-2xl text-blue-700">30</span></div>
             </div>
-            <div class="p-4 border-t border-slate-200 flex justify-end gap-3 bg-white">
-                <button onclick="close30PtsModal()" class="px-5 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">Hủy</button>
-                <button id="btn-save-30pts" onclick="save30PtsToDB()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow">LƯU ĐIỂM TIÊU CHÍ</button>
-            </div>
+            <div class="p-4 border-t border-slate-200 flex justify-end gap-3 bg-white"><button onclick="close30PtsModal()" class="px-5 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">Hủy</button><button id="btn-save-30pts" onclick="save30PtsToDB()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow">LƯU ĐIỂM TIÊU CHÍ</button></div>
         </div>
     </div>
 
-    <!-- SCRIPT -->
+    <!-- SCRIPT TỔNG HỢP -->
     <script type="text/javascript">
         // 1. FIREBASE CONFIG
         const firebaseConfig = { apiKey: "AIzaSyBQ674rvyTsjbPBNMXscVE1LFY3uo1Neaw", authDomain: "class-rank-noi-tru-dak-song.firebaseapp.com", projectId: "class-rank-noi-tru-dak-song", storageBucket: "class-rank-noi-tru-dak-song.firebasestorage.app", messagingSenderId: "1087793103334", appId: "1:1087793103334:web:0c813d1d241f03529d1627" };
         const basePath = ['artifacts', 'kpi-app-daksong', 'public', 'data'];
 
-        // 2. GAS URL (Sử dụng đúng API ID của đồng chí)
+        // 2. GAS URL 
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwXSEJWFSfcpNhYFvLqd5AoTTKdpLKT9ulE_sPh5oyHq7CalRbxbYo2q2zyazwDuQU69w/exec";
 
         let app, db, auth;
         try { app = firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); } catch(e){}
+        
         const signInAnonymously = (a) => a.signInAnonymously();
         const doc = (d, ...paths) => paths.length > 0 ? d.doc(paths.join('/')) : d.doc();
         const collection = (d, ...paths) => d.collection(paths.join('/'));
         const setDoc = (ref, data, opts) => ref.set(data, opts);
         const addDoc = (ref, data) => ref.add(data);
         const updateDoc = (ref, data) => ref.update(data);
+        const deleteDoc = (ref) => ref.delete();
         const onSnapshot = (ref, cb) => ref.onSnapshot(cb);
 
-        let currentUser = null; let allUsers = []; 
+        let currentUser = null; let allUsers = []; let departments = [];
         let viewingUserId = null; let viewingUserObj = null; let tasks = []; 
         let viewingDocInfo = { status: 'DRAFT', tc1: 5, tc2: 5, tc3: 10, tc4: 10, generalScore: 30 }; 
 
@@ -281,8 +300,12 @@
         function initCloudAndSync() {
             signInAnonymously(auth).then(() => {
                 onSnapshot(collection(db, ...basePath, 'users'), (snap) => {
-                    allUsers = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-                    if(currentUser && (currentUser.role === 'tt' || currentUser.role === 'bgh')) populateManagerFilter();
+                    if (snap.empty) { const adminUser = { id: 'admin1', username: 'admin', password: '1', role: 'admin', fullName: 'Quản trị viên', jobTitle: 'Admin', dept: 'BGH', email: '' }; setDoc(doc(db, ...basePath, 'users', adminUser.id), adminUser); } 
+                    else { allUsers = snap.docs.map(d => ({ ...d.data(), id: d.id })); if(document.getElementById('view-admin').classList.contains('block')) renderUsersTable(); if(currentUser && (currentUser.role === 'tt' || currentUser.role === 'bgh')) populateManagerFilter(); }
+                });
+                onSnapshot(doc(db, ...basePath, 'config', 'departments'), (snap) => {
+                    if (snap.exists) departments = snap.data().list || []; else { departments = ["Ban Giám Hiệu", "Tổ Toán - Lý - Tin", "Tổ Văn - Sử - Địa", "Tổ Hóa - Sinh", "Tổ Ngoại ngữ - QPAN", "Tổ Văn phòng"]; setDoc(doc(db, ...basePath, 'config', 'departments'), { list: departments }); }
+                    renderDepartments();
                 });
                 document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-emerald-500"></i> Đã kết nối!';
                 document.getElementById('btn-login').disabled = false;
@@ -297,12 +320,16 @@
             if(!found) return showToast("Sai tài khoản hoặc mật khẩu!", "error");
             currentUser = found; document.getElementById('user-display-name').textContent = currentUser.fullName;
             document.getElementById('user-role-name').textContent = (currentUser.jobTitle || 'Giáo viên') + " - " + currentUser.dept;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-wrapper').classList.remove('hidden'); setTimeout(() => document.getElementById('app-wrapper').classList.remove('opacity-0'), 50);
-            switchView('dashboard'); setupDashboardRole();
+            document.getElementById('login-screen').classList.add('hidden'); document.getElementById('app-wrapper').classList.remove('hidden'); setTimeout(() => document.getElementById('app-wrapper').classList.remove('opacity-0'), 50);
+            if(currentUser.role === 'admin') { document.getElementById('nav-admin').classList.remove('hidden'); switchView('admin'); }
+            else { document.getElementById('nav-dashboard').classList.remove('hidden'); switchView('dashboard'); setupDashboardRole(); }
         });
         function handleLogout() { window.location.reload(); }
-        function switchView(v) { /* Giữ code ẩn hiện view */ }
+        
+        function switchView(v) { 
+            document.getElementById('view-dashboard').classList.toggle('hidden', v !== 'dashboard'); document.getElementById('view-dashboard').classList.toggle('block', v === 'dashboard');
+            document.getElementById('view-admin').classList.toggle('hidden', v !== 'admin'); document.getElementById('view-admin').classList.toggle('block', v === 'admin');
+        }
 
         function setupDashboardRole() {
             const filterBar = document.getElementById('manager-filter-bar');
@@ -315,7 +342,7 @@
         }
         function populateManagerFilter() {
             const select = document.getElementById('filter-user'); select.innerHTML = '<option value="">-- Chọn Giáo viên / Nhân viên --</option>';
-            let list = (currentUser.role === 'tt') ? allUsers.filter(u => u.dept === currentUser.dept && u.role === 'gv') : allUsers.filter(u => u.role !== 'admin');
+            let list = (currentUser.role === 'tt') ? allUsers.filter(u => u.dept === currentUser.dept && u.role === 'gv') : allUsers.filter(u => u.role !== 'admin' && u.role !== 'bgh');
             list.forEach(u => { select.innerHTML += `<option value="${u.id}">${u.fullName} (${u.jobTitle || 'GV'})</option>`; });
         }
         function loadTasksForSelectedUser() {
@@ -339,16 +366,11 @@
             });
         }
 
-        // TÍNH TOÁN NGÀY LÀM VIỆC (BỎ QUA T7, CN)
         function getBusinessDaysDiff(startDateStr, endDateStr) {
-            const start = new Date(startDateStr); start.setHours(0,0,0,0);
-            const end = new Date(endDateStr); end.setHours(0,0,0,0);
-            if(end <= start) return 0; // Không trễ
-            let count = 0; let cur = new Date(start.getTime()); cur.setDate(cur.getDate() + 1); // Bắt đầu đếm từ ngày hôm sau
-            while(cur <= end) {
-                const day = cur.getDay(); if(day !== 0 && day !== 6) count++; // 0: CN, 6: T7
-                cur.setDate(cur.getDate() + 1);
-            }
+            const start = new Date(startDateStr); start.setHours(0,0,0,0); const end = new Date(endDateStr); end.setHours(0,0,0,0);
+            if(end <= start) return 0; 
+            let count = 0; let cur = new Date(start.getTime()); cur.setDate(cur.getDate() + 1); 
+            while(cur <= end) { const day = cur.getDay(); if(day !== 0 && day !== 6) count++; cur.setDate(cur.getDate() + 1); }
             return count;
         }
 
@@ -369,7 +391,6 @@
             return { html, autoDelayDays: autoDelay };
         }
 
-        // FIX XIAOMI DATE
         function fixXiaomiDate(val) {
             if(!val) return val; let parts = val.split('-');
             if(parts[0].length === 4 && parseInt(parts[0]) < 2000) { parts[0] = (parseInt(parts[0]) + 2000).toString(); return parts.join('-'); }
@@ -397,7 +418,6 @@
             await updateTaskInDB(id, { completedDate: dateStr, completion: 100 }); showToast("Đã xác nhận thời gian!");
         }
 
-        // UPLOAD DRIVE
         async function uploadEvidence(taskId) {
             const input = document.createElement('input'); input.type = 'file';
             input.onchange = async (e) => {
@@ -431,18 +451,17 @@
                 const scoreA = baseScore * (task.completion / 100); const scoreB = Math.max(0, baseScore * (1 - (0.05 * task.errorCount))); const scoreC = Math.max(0, baseScore * (1 - (0.05 * task.delayDays)));
                 const actualScore = (scoreA + scoreB + scoreC) / 3;
 
-                let proofHTML = task.evidenceUrl ? `<a href="${task.evidenceUrl}" target="_blank" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold"><i class="fas fa-eye"></i> Xem</a>` : (canEdit && task.completedDate ? `<button onclick="uploadEvidence('${task.id}')" class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold w-full"><i class="fas fa-upload text-blue-600"></i> Up</button>` : `<span class="text-xs text-slate-400">---</span>`);
-                let actionHTML = !task.completedDate ? `<button onclick="markCompleted('${task.id}')" class="${canEdit?'bg-blue-100 text-blue-700':'bg-slate-100 text-slate-300'} px-2 py-1 rounded text-[10px] font-bold w-full" ${!canEdit?'disabled':''}><i class="fas fa-check"></i> Xong</button>` : `<div class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-1 rounded text-center">${new Date(task.completedDate).toLocaleDateString('vi-VN')}</div>`;
+                let proofHTML = task.evidenceUrl ? `<a href="${task.evidenceUrl}" target="_blank" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold w-full flex justify-center"><i class="fas fa-eye mr-1"></i> Xem file</a>` : (canEdit && task.completedDate ? `<button onclick="uploadEvidence('${task.id}')" class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold w-full text-slate-700 hover:bg-slate-300 transition"><i class="fas fa-upload text-blue-600 mr-1"></i> Up file</button>` : `<span class="text-xs text-slate-400">---</span>`);
+                let actionHTML = !task.completedDate ? `<button onclick="markCompleted('${task.id}')" class="${canEdit?'bg-blue-100 text-blue-700 hover:bg-blue-200 transition border border-blue-200':'bg-slate-100 text-slate-300'} px-2 py-1 rounded text-[10px] font-bold w-full" ${!canEdit?'disabled':''}><i class="fas fa-check"></i> Xác nhận Xong</button>` : `<div class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-1 rounded text-center">Đã chốt: ${new Date(task.completedDate).toLocaleDateString('vi-VN')}</div>`;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="text-center font-bold text-slate-400">${index + 1}</td>
-                    <!-- Smart Input Datalist -->
                     <td><input list="task-templates" class="table-input font-semibold text-slate-700 ${!canEdit ? 'table-readonly' : ''}" value="${task.name}" onblur="updateTaskLocal('${task.id}', 'name', this.value)" ${!canEdit ? 'readonly' : ''} placeholder="Chọn mẫu hoặc gõ..."></td>
-                    <td><select class="table-input font-bold text-slate-700 ${!canEdit ? 'table-readonly' : ''}" onchange="updateTaskLocal('${task.id}', 'group', this.value)" ${!canEdit ? 'disabled' : ''}><option value="1" ${task.group==="1"?'selected':''}>Nhóm 1</option><option value="2" ${task.group==="2"?'selected':''}>Nhóm 2</option><option value="3" ${task.group==="3"?'selected':''}>Nhóm 3</option><option value="4" ${task.group==="4"?'selected':''}>Nhóm 4</option></select></td>
+                    <td><select class="table-input font-bold text-slate-700 ${!canEdit ? 'table-readonly' : ''}" onchange="updateTaskLocal('${task.id}', 'group', this.value)" ${!canEdit ? 'disabled' : ''}><option value="1" ${task.group==="1"?'selected':''}>Nhóm 1 (100)</option><option value="2" ${task.group==="2"?'selected':''}>Nhóm 2 (150)</option><option value="3" ${task.group==="3"?'selected':''}>Nhóm 3 (200)</option><option value="4" ${task.group==="4"?'selected':''}>Nhóm 4 (250)</option></select></td>
                     <td class="text-center font-black text-amber-500 text-base bg-amber-50/20">${baseScore}</td>
                     <td class="p-2 border-l border-slate-300 bg-slate-50/50"><div class="flex flex-col gap-1 items-center"><input type="date" class="table-input text-[11px] font-bold text-slate-700 p-1 ${!canEdit ? 'table-readonly' : ''}" value="${task.deadline}" onchange="updateTaskLocal('${task.id}', 'deadline', this.value)" ${!canEdit ? 'readonly' : ''}><div class="text-center">${dateLogic.html}</div></div></td>
-                    <td class="bg-slate-50/50 p-2 align-middle border-x border-slate-200">${actionHTML}</td><td class="bg-slate-50/50 p-2 align-middle border-r border-slate-300 text-center">${proofHTML}</td>
+                    <td class="bg-slate-50/50 p-2 align-middle border-x border-slate-200"><div class="flex flex-col gap-1 w-full">${actionHTML}</div></td><td class="bg-slate-50/50 p-2 align-middle border-r border-slate-300 text-center"><div class="flex flex-col gap-1 w-full">${proofHTML}</div></td>
                     <td class="bg-emerald-50/10 text-center font-bold text-red-500">${task.delayDays}</td>
                     <td class="bg-emerald-50/10 border-r border-slate-300"><input type="number" class="table-input text-center text-red-600 font-bold ${!canDuyet ? 'table-readonly' : 'bg-yellow-50 focus:border-red-500'}" value="${task.errorCount}" min="0" onchange="updateTaskLocal('${task.id}', 'errorCount', this.value)" ${!canDuyet ? 'readonly' : ''}></td>
                     <td id="actual-cell-${task.id}" class="text-center font-bold text-slate-600 bg-slate-50">${actualScore.toFixed(2)}</td><td id="kpi-cell-${task.id}" class="text-center font-black text-lg text-emerald-600 bg-emerald-50 shadow-inner">...</td>
@@ -450,14 +469,12 @@
                 `; tbody.appendChild(tr);
             });
             
-            // Xử lý nút 30 điểm
             const btn30Pts = document.getElementById('btn-open-30pts');
             if(canDuyet || canEdit) { btn30Pts.disabled = false; btn30Pts.classList.remove('opacity-50', 'cursor-not-allowed'); } else { btn30Pts.disabled = true; btn30Pts.classList.add('opacity-50', 'cursor-not-allowed'); }
 
             calculateTotal(); updateActionButtons();
         }
 
-        // TÍNH ĐIỂM
         function calculateTotal() {
             let totalBase = 0; let totalActual = 0;
             tasks.forEach(task => {
@@ -489,7 +506,6 @@
             else { badge.className = "px-8 py-5 rounded-2xl border-2 font-black text-2xl bg-red-100 text-red-800"; badge.textContent = "Không hoàn thành"; condition.textContent = "Tổng điểm <50đ. Vi phạm quy chế."; }
         }
 
-        // 30 ĐIỂM MODAL
         function open30PtsModal() {
             document.getElementById('tc1').value = viewingDocInfo.tc1 ?? 5; document.getElementById('tc2').value = viewingDocInfo.tc2 ?? 5; document.getElementById('tc3').value = viewingDocInfo.tc3 ?? 10; document.getElementById('tc4').value = viewingDocInfo.tc4 ?? 10;
             calc30Pts(); document.getElementById('modal-30pts').classList.remove('hidden');
@@ -530,26 +546,195 @@
         }
         async function changeDocStatus(newStatus) { if(confirm("Xác nhận thao tác?")) { await setDoc(doc(db, ...basePath, 'kpi_docs', viewingUserId), { status: newStatus }, {merge: true}); showToast("Cập nhật thành công!"); } }
 
-        // XUẤT EXCEL PHỤ LỤC 3 (TỔNG HỢP)
-        function exportPhuLuc3Excel() {
-            showToast("Tính năng xuất Excel Phụ lục III cần lấy toàn bộ dữ liệu Tổ. Sẽ có ở bản cập nhật nâng cao kế tiếp sau khi giáo viên nhập liệu đủ 1 quý.", "info");
-        }
+        function exportPhuLuc3Excel() { showToast("Tính năng xuất Excel Phụ lục III cần lấy toàn bộ dữ liệu Tổ. Sẽ có ở bản cập nhật nâng cao kế tiếp.", "info"); }
 
-        // XUẤT WORD PHỤ LỤC 2
         function exportWordReport() {
             if(!viewingUserObj || tasks.length === 0) return showToast("Không có dữ liệu để xuất!", "warning");
-            showToast("Đang tạo file Word Phụ lục II...", "info", true);
-            let trRows = "";
+            showToast("Đang tạo file Word Phụ lục II chuẩn hành chính...", "info", true);
+
+            const today = new Date(); 
+            const dd = String(today.getDate()).padStart(2, '0'); 
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); 
+            const yyyy = today.getFullYear();
+
+            let totalBase = 0; let totalActual = 0; let trRows = "";
+            
             tasks.forEach((t, index) => {
-                const baseScore = GROUP_SCORES[t.group] || 0; const act = ((baseScore*(t.completion/100)) + Math.max(0, baseScore*(1-(0.05*t.errorCount))) + Math.max(0, baseScore*(1-(0.05*t.delayDays))))/3;
-                trRows += `<tr><td style="border:1pt solid black; text-align:center;">${index + 1}</td><td style="border:1pt solid black;">${t.name}</td><td style="border:1pt solid black; text-align:center;">Nhóm ${t.group}</td><td style="border:1pt solid black; text-align:center;">${baseScore}</td><td style="border:1pt solid black; text-align:center;">${t.completion}%</td><td style="border:1pt solid black; text-align:center;">${t.errorCount}</td><td style="border:1pt solid black; text-align:center;">${t.delayDays}</td><td style="border:1pt solid black; text-align:center;">${act.toFixed(2)}</td></tr>`;
+                const baseScore = GROUP_SCORES[t.group] || 0; totalBase += baseScore;
+                const scoreA = baseScore * (t.completion / 100);
+                const scoreB = Math.max(0, baseScore * (1 - (0.05 * t.errorCount)));
+                const scoreC = Math.max(0, baseScore * (1 - (0.05 * t.delayDays)));
+                const act = (scoreA + scoreB + scoreC) / 3; totalActual += act;
+                
+                trRows += `
+                    <tr>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${index + 1}</td>
+                        <td style="border: 1px solid black; padding: 5px;">${t.name}</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">Nhóm ${t.group}</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${baseScore}</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${t.completion}%</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${t.errorCount}</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${t.delayDays}</td>
+                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${act.toFixed(2)}</td>
+                    </tr>`;
             });
-            const kpiFinal = document.getElementById('final-kpi-display').value; const finalScore = document.getElementById('final-total-score').textContent; const ratingText = document.getElementById('rating-badge').textContent;
-            let htmlContent = `<div style="text-align:center; font-family:'Times New Roman',serif;"><div style="font-weight:bold; font-size:14pt;">PHỤ LỤC II</div><div style="font-weight:bold; font-size:16pt;">PHIẾU ĐÁNH GIÁ CÁ NHÂN</div></div><table style="width:100%; border:none; margin-bottom:20px; font-size:13pt; font-family:'Times New Roman',serif;"><tr><td>Họ tên: ${viewingUserObj.fullName}</td></tr><tr><td>Chức vụ: ${viewingUserObj.jobTitle||''} - Tổ: ${viewingUserObj.dept}</td></tr></table><table style="width:100%; border-collapse:collapse; font-size:12pt; font-family:'Times New Roman',serif; margin-bottom:20px;"><tr><th style="border:1pt solid black;">TT</th><th style="border:1pt solid black;">Nhiệm vụ</th><th style="border:1pt solid black;">Nhóm</th><th style="border:1pt solid black;">Đ.Chuẩn</th><th style="border:1pt solid black;">% Xong</th><th style="border:1pt solid black;">Sửa</th><th style="border:1pt solid black;">Trễ</th><th style="border:1pt solid black;">Thực tế</th></tr>${trRows}</table><p style="font-family:'Times New Roman',serif; font-size:13pt;">Tổng KPI: <b>${kpiFinal}</b> + Tiêu chí chung: <b>${document.getElementById('general-score').value}</b> = <b>${finalScore} điểm</b>. Mức: <b>${ratingText}</b></p>`;
-            var blob = new Blob(['\ufeff', `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>PL2</title></head><body>${htmlContent}</body></html>`], { type: 'application/msword' }); 
-            var link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `PL2_${viewingUserObj.fullName}.doc`; document.body.appendChild(link); link.click(); document.body.removeChild(link); 
+
+            const kpiFinal = totalBase > 0 ? ((totalActual / totalBase) * 70).toFixed(2) : "0.00";
+            const genScore = viewingDocInfo.generalScore || 0;
+            const finalScore = (parseFloat(kpiFinal) + parseFloat(genScore)).toFixed(2);
+            const ratingText = document.getElementById('rating-badge').textContent;
+
+            let htmlContent = `
+                <table style="width:100%; border:none; font-family:'Times New Roman',serif; font-size:13pt; margin-bottom:20px;">
+                    <tr>
+                        <td style="text-align:center; width:45%; vertical-align:top;">
+                            SỞ GIÁO DỤC VÀ ĐÀO TẠO<br>
+                            <b>TRƯỜNG PTDTNT THCS & THPT<br>ĐẮK SONG</b><br>
+                            <hr style="width: 40%; border-top: 1px solid black; margin-top: 5px;">
+                        </td>
+                        <td style="text-align:center; width:55%; vertical-align:top;">
+                            <b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</b><br>
+                            <hr style="width: 40%; border-top: 1px solid black; margin-top: 5px;">
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="text-align:center; font-family:'Times New Roman',serif; margin-bottom: 20px;">
+                    <div style="font-weight:bold; font-size:14pt; margin-bottom: 5px;">PHỤ LỤC II</div>
+                    <div style="font-weight:bold; font-size:15pt;">PHIẾU CHẤM ĐIỂM KPI VÀ TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN</div>
+                    <div style="font-style:italic; font-size:12pt; margin-top: 5px;">(Kèm theo Công văn số 5142/SGDĐT-TCCB ngày 30/9/2026 của Sở GDĐT)</div>
+                </div>
+                
+                <div style="font-size:13pt; font-family:'Times New Roman',serif; margin-bottom: 15px; line-height: 1.5;">
+                    - Họ và tên: <b>${viewingUserObj.fullName}</b><br>
+                    - Chức vụ, chức danh: ${viewingUserObj.jobTitle || 'Giáo viên'}<br>
+                    - Đơn vị công tác: ${viewingUserObj.dept}<br>
+                </div>
+
+                <div style="font-weight:bold; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:5px;">I. KẾT QUẢ THỰC HIỆN NHIỆM VỤ THEO KPI (Tối đa 70 điểm)</div>
+                <table style="width:100%; border-collapse:collapse; font-size:12pt; font-family:'Times New Roman',serif; margin-bottom:20px;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">TT</th>
+                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Nhiệm vụ được giao</th>
+                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Phân nhóm</th>
+                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Điểm chuẩn</th>
+                            <th colspan="3" style="border: 1px solid black; padding: 5px;">Kết quả thực hiện</th>
+                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Điểm thực tế</th>
+                        </tr>
+                        <tr>
+                            <th style="border: 1px solid black; padding: 5px;">HT (%)</th>
+                            <th style="border: 1px solid black; padding: 5px;">Số lần sửa</th>
+                            <th style="border: 1px solid black; padding: 5px;">Trễ (ngày)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${trRows}
+                        <tr>
+                            <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold; padding: 5px;">TỔNG CỘNG ĐIỂM CHUẨN:</td>
+                            <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${totalBase}</td>
+                            <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold; padding: 5px;">ĐIỂM KPI QUY ĐỔI (Tối đa 70đ):</td>
+                            <td style="border: 1px solid black; text-align: center; font-weight: bold; font-size: 14pt; padding: 5px;">${kpiFinal}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="font-weight:bold; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:5px;">II. TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN</div>
+                <table style="width:100%; border-collapse:collapse; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:20px;">
+                    <tr>
+                        <td style="border: 1px solid black; padding: 5px; font-weight: bold; text-align: center;">Nội dung</td>
+                        <td style="border: 1px solid black; padding: 5px; width: 20%; font-weight: bold; text-align: center;">Điểm tối đa</td>
+                        <td style="border: 1px solid black; padding: 5px; width: 20%; font-weight: bold; text-align: center;">Điểm đạt được</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid black; padding: 5px;">1. Nhóm tiêu chí chung theo quy định của Đảng</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">30</td>
+                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${genScore}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid black; padding: 5px;">2. Kết quả thực hiện nhiệm vụ theo KPI (Mục I)</td>
+                        <td style="border: 1px solid black; text-align: center; padding: 5px;">70</td>
+                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${kpiFinal}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid black; font-weight: bold; padding: 5px;">TỔNG ĐIỂM CÁ NHÂN TỰ ĐÁNH GIÁ</td>
+                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">100</td>
+                        <td style="border: 1px solid black; text-align: center; font-weight: bold; font-size: 15pt; padding: 5px;">${finalScore}</td>
+                    </tr>
+                </table>
+
+                <div style="font-weight:bold; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:5px;">III. TỰ ĐỀ XUẤT MỨC XẾP LOẠI</div>
+                <div style="font-size:13pt; font-family:'Times New Roman',serif; margin-bottom: 30px;">
+                    - Mức tự xếp loại chất lượng: <b>${ratingText}</b>.
+                </div>
+
+                <table style="width:100%; border:none; font-family:'Times New Roman',serif; font-size:13pt; page-break-inside: avoid;">
+                    <tr>
+                        <td style="width:33%; text-align:center; vertical-align:top;">
+                            <b style="display:block; margin-bottom: 5px;">XÁC NHẬN CỦA LÃNH ĐẠO</b>
+                            <i style="font-size: 12pt;">(Ký, ghi rõ họ tên)</i>
+                        </td>
+                        <td style="width:33%; text-align:center; vertical-align:top;">
+                            <b style="display:block; margin-bottom: 5px;">TỔ TRƯỞNG CHUYÊN MÔN</b>
+                            <i style="font-size: 12pt;">(Ký, ghi rõ họ tên)</i>
+                        </td>
+                        <td style="width:34%; text-align:center; vertical-align:top;">
+                            <i style="font-size: 12pt;">Đắk Song, ngày ${dd} tháng ${mm} năm ${yyyy}</i><br>
+                            <b style="display:block; margin-top: 5px; margin-bottom: 5px;">NGƯỜI TỰ ĐÁNH GIÁ</b>
+                            <i style="font-size: 12pt;">(Ký, ghi rõ họ tên)</i>
+                            <br><br><br><br><br>
+                            <b>${viewingUserObj.fullName}</b>
+                        </td>
+                    </tr>
+                </table>
+            `;
+
+            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>Phụ lục II</title><style>@page WordSection1 { size: 595.3pt 841.9pt; margin: 56.7pt 56.7pt 56.7pt 70.9pt; mso-header-margin: 35.4pt; mso-footer-margin: 35.4pt; mso-paper-source: 0; } div.WordSection1 { page: WordSection1; }</style></head><body><div class='WordSection1'>";
+            var footer = "</div></body></html>";
+            var sourceHTML = header + htmlContent + footer;
+
+            var blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
+            var link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
+            link.download = `PhuLucII_${viewingUserObj.fullName.replace(/ /g, '_')}.doc`; 
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
             document.querySelectorAll('.toast').forEach(t => t.remove());
         }
-    </script>
-</body>
-</html>
+
+        // ==========================================
+        // QUẢN TRỊ USER VÀ PHÒNG BAN
+        // ==========================================
+        function renderDepartments() {
+            const container = document.getElementById('dept-list-container');
+            if(container) {
+                container.innerHTML = '';
+                if(departments.length === 0) container.innerHTML = '<div class="text-slate-400 italic text-sm py-2">Chưa có Tổ nào được tạo.</div>';
+                else departments.forEach(d => { container.innerHTML += `<span class="bg-white text-emerald-800 border border-emerald-200 shadow-sm px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">${d} <i class="fas fa-times-circle cursor-pointer text-red-300 hover:text-red-500 ml-1 text-base" onclick="removeDepartment('${d}')"></i></span>`; });
+            }
+            const select = document.getElementById('user-dept');
+            if(select) {
+                const currentVal = select.value; select.innerHTML = '<option value="">-- Chọn Tổ / Bộ phận --</option>';
+                departments.forEach(d => { select.innerHTML += `<option value="${d}">${d}</option>`; });
+                if(departments.includes(currentVal)) select.value = currentVal;
+            }
+        }
+        async function addDepartment() {
+            if(currentUser?.role !== 'admin') return;
+            const input = document.getElementById('new-dept-name'); const val = input.value.trim();
+            if(!val) return showToast("Vui lòng nhập tên Tổ!", "warning");
+            if(departments.includes(val)) return showToast("Tổ này đã tồn tại!", "error");
+            const newList = [...departments, val];
+            try { await setDoc(doc(db, ...basePath, 'config', 'departments'), { list: newList }); input.value = ''; showToast("Đã thêm Tổ mới!"); } catch(e) { showToast("Lỗi khi thêm!", "error"); }
+        }
+        async function removeDepartment(name) {
+            if(currentUser?.role !== 'admin') return;
+            if(confirm(`Xóa tổ: ${name}?`)) {
+                const newList = departments.filter(d => d !== name);
+                try { await setDoc(doc(db, ...basePath, 'config', 'departments'), { list: newList }); showToast("Đã xóa Tổ!"); } catch(e) { showToast("Lỗi khi xóa!", "error"); }
+            }
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-table-body'); if(!tbody) return; tbody.innerHTML = '';
+            allUsers.forEach(u => {
+                let rBadge = u.role==='admin' ? '<span class="badge bg-slate-800 text-white">Admin</span>' : (u.role==='bgh' ? '<span class="badge bg-indigo-100 text-indigo-800">BGH</span>' : (u.role==='tt' ? '<span class="badge bg-amber-100 text-amber-800">Tổ trưởng</span>' : '<span class="badge bg-blue-100 text-blue-800">Giáo viên</span>'));
+                tbody.innerHTML += `<tr class="border-b border-slate-100"><td class="p-4 font-bold text-slate-800">${u.fullName} <span class="block text-xs text-slate-500">${u.jobTitle || ''}</span></td><td class="p-4 font-mono text-blue-600 bg-blue-50/30">${u.username} <span class="text-slate-400 text-xs block mt-1"><i class="fas fa-key"></i> ${u.password}</span></td><td class="p-4">${rBadge} <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded ml-1 border border-emerald-100">${u.dept}</span></td>
