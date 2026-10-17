@@ -201,7 +201,7 @@
                             </div>
                         </div>
                         
-                        <!-- NÚT XUẤT PHIẾU ĐÃ ĐƯỢC KHÔI PHỤC Ở ĐÂY -->
+                        <!-- NÚT XUẤT PHIẾU -->
                         <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
                             <button onclick="exportWordReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow transition flex items-center gap-2">
                                 <i class="fas fa-file-word"></i> Xuất Phiếu In (Phụ lục II)
@@ -312,7 +312,7 @@
         </main>
     </div>
 
-    <!-- SCRIPT LOGIC -->
+    <!-- SCRIPT LOGIC (FIREBASE + GOOGLE APPS SCRIPT INTEGRATION) -->
     <script type="text/javascript">
         
         // 1. CẤU HÌNH FIREBASE
@@ -336,10 +336,12 @@
             auth = firebase.auth();
         } catch (e) { console.error("Firebase Init Error:", e); }
 
+        // SỬA LỖI BUG THÊM VIỆC TẠI ĐÂY: Wrapper doc() an toàn
         const signInAnonymously = (a) => a.signInAnonymously();
-        const doc = (d, ...paths) => d.doc(paths.join('/'));
+        const doc = (d, ...paths) => paths.length > 0 ? d.doc(paths.join('/')) : d.doc();
         const collection = (d, ...paths) => d.collection(paths.join('/'));
         const setDoc = (ref, data, opts) => ref.set(data, opts);
+        const addDoc = (ref, data) => ref.add(data);
         const updateDoc = (ref, data) => ref.update(data);
         const deleteDoc = (ref) => ref.delete();
         const onSnapshot = (ref, cb) => ref.onSnapshot(cb);
@@ -352,7 +354,6 @@
         let viewingUserObj = null;
         let tasks = []; 
         let viewingDocInfo = { status: 'DRAFT', generalScore: 30 }; 
-        let lastRenderedTasksStr = ""; // Chống render liên tục mất focus
 
         const GROUP_SCORES = { "1": 100, "2": 150, "3": 200, "4": 250 };
         const ROLE_NAMES = { 'gv': 'GV / Nhân viên', 'tt': 'Tổ trưởng (Duyệt)', 'bgh': 'Ban Giám Hiệu', 'admin': 'Admin' };
@@ -525,7 +526,6 @@
             unsubscribeDoc = onSnapshot(doc(db, ...basePath, 'kpi_docs', viewingUserId), (snap) => {
                 if(snap.exists) { viewingDocInfo = snap.data(); } 
                 else { 
-                    // Chắc chắn mặc định là DRAFT khi chưa có doc
                     viewingDocInfo = { status: 'DRAFT', generalScore: 30 }; 
                     if(viewingUserId === currentUser.id && currentUser.role === 'gv') {
                         setDoc(doc(db, ...basePath, 'kpi_docs', viewingUserId), viewingDocInfo);
@@ -533,46 +533,38 @@
                 }
                 document.getElementById('general-score').value = viewingDocInfo.generalScore; document.getElementById('doc-status-badge').innerHTML = STATUS_NAMES[viewingDocInfo.status] || '...';
                 updateActionButtons();
-                // Render lại bảng nếu quyền thay đổi dựa trên status
                 renderKPITable();
             });
 
             unsubscribeTasks = onSnapshot(collection(db, ...basePath, 'kpi_tasks'), (snap) => {
-                const newTasks = snap.docs.map(d => ({...d.data(), id: d.id})).filter(t => t.userId === viewingUserId); 
-                newTasks.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
-                
-                // Chỉ render lại nếu dữ liệu thực sự thay đổi để tránh mất focus khi đang gõ
-                const newTasksStr = JSON.stringify(newTasks);
-                if(newTasksStr !== lastRenderedTasksStr) {
-                    tasks = newTasks;
-                    lastRenderedTasksStr = newTasksStr;
-                    renderKPITable(); 
-                    checkAndSendReminders(); 
-                }
+                tasks = snap.docs.map(d => ({...d.data(), id: d.id})).filter(t => t.userId === viewingUserId); 
+                tasks.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+                renderKPITable(); 
+                checkAndSendReminders(); 
             });
         }
 
         async function updateTaskInDB(taskId, data) { try { await updateDoc(doc(db, ...basePath, 'kpi_tasks', String(taskId)), data); } catch(e) {} }
 
-        // Sửa hàm này: Gọi ngầm DB, render lại bảng nội bộ (ko dùng lastRenderedTasksStr để tránh giật)
         function updateTaskLocal(id, field, value) {
             const task = tasks.find(t => t.id === id);
             if (task) {
                 let val = value; if (['completion', 'errorCount'].includes(field)) { val = value === '' ? 0 : parseFloat(value); if(field === 'completion' && val > 100) val = 100; }
                 task[field] = val; 
-                // Cập nhật ngầm lên DB. onSnapshot sẽ bắt được, nhưng vì ta đang gõ (focus), 
-                // ta cần cẩn thận. Việc dùng onchange (blur) là an toàn nhất.
                 updateTaskInDB(id, { [field]: val }); 
-                // Tính lại điểm tức thì trên giao diện mà ko cần render lại toàn bộ bảng
                 calculateTotal();
             }
         }
 
         async function addTaskRow() {
             if(viewingDocInfo.status !== 'DRAFT') return showToast("Phiếu đã chốt, không thể thêm nhiệm vụ!", "warning");
-            const newDocRef = doc(collection(db, ...basePath, 'kpi_tasks'));
+            
+            // SỬA LỖI TẠO ID MỚI Ở ĐÂY: Dùng addDoc thay vì setDoc
             const newTask = { userId: viewingUserId, name: "", group: "1", deadline: "", completedDate: null, completion: 0, errorCount: 0, delayDays: 0, evidenceUrl: "", createdAt: Date.now() };
-            try { await setDoc(newDocRef, newTask); showToast("Đã thêm dòng nhiệm vụ mới"); } catch(e) { showToast("Lỗi!", "error"); }
+            try { 
+                await addDoc(collection(db, ...basePath, 'kpi_tasks'), newTask); 
+                showToast("Đã thêm dòng nhiệm vụ mới"); 
+            } catch(e) { showToast("Lỗi!", "error"); }
         }
 
         async function removeTask(id) {
