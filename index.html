@@ -32,14 +32,25 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
 <body class="h-screen flex flex-col overflow-hidden">
 <div id="toasts"></div>
 
-<!-- ĐĂNG NHẬP -->
+<!-- ĐĂNG NHẬP NỘI BỘ -->
 <div id="login" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 p-4">
  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border-t-8 border-sky-600">
   <img src="https://i.postimg.cc/YqTBpm7v/LOGO-NOI-TRU.png" class="w-24 h-24 mx-auto rounded-full mb-4" alt="">
   <h2 class="text-3xl font-black text-center text-slate-800">KPI PORTAL</h2>
-  <p class="text-center text-xs font-bold text-slate-500 mb-4">PTDTNT THCS & THPT Đắk Song</p>
-  <button onclick="googleLogin()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-black py-3 rounded-xl"><i class="fab fa-google mr-2"></i> ĐĂNG NHẬP BẰNG GOOGLE</button>
-  <p class="text-xs text-slate-500 text-center mt-3">Dùng email Google đã được Quản trị viên đăng ký.</p>
+  <p class="text-center text-xs font-bold text-slate-500 mb-6">PTDTNT THCS & THPT Đắk Song</p>
+  
+  <form onsubmit="handleLogin(event)" class="space-y-4">
+   <div>
+    <label class="text-xs font-bold text-slate-700">Email đăng nhập</label>
+    <input id="l-email" type="email" required class="ti mt-1" placeholder="admin@daksong.edu.vn">
+   </div>
+   <div>
+    <label class="text-xs font-bold text-slate-700">Mật khẩu</label>
+    <input id="l-pass" type="password" required class="ti mt-1" placeholder="••••••••">
+   </div>
+   <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-black py-3 rounded-xl shadow-lg transition"><i class="fas fa-sign-in-alt mr-2"></i> ĐĂNG NHẬP HỆ THỐNG</button>
+  </form>
+  <p class="text-[11px] text-slate-400 text-center mt-4">Sử dụng tài khoản do Quản trị viên nhà trường cấp.</p>
  </div>
 </div>
 
@@ -50,7 +61,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
    <div class="flex items-center gap-3">
     <select id="period-sel" onchange="setPeriod(this.value)" class="bg-sky-800 text-white text-sm font-bold rounded-lg px-2 py-2 max-w-[11rem]"></select>
     <div class="text-right hidden sm:block"><p class="text-sm font-bold" id="u-name"></p><p class="text-xs text-emerald-300" id="u-role"></p></div>
-    <button onclick="auth.signOut().then(()=>location.reload())" class="w-10 h-10 bg-sky-800 hover:bg-red-600 rounded-lg"><i class="fas fa-power-off"></i></button>
+    <button onclick="auth.signOut().then(()=>location.reload())" class="w-10 h-10 bg-sky-800 hover:bg-red-600 rounded-lg flex items-center justify-center" title="Đăng xuất"><i class="fas fa-power-off"></i></button>
    </div>
   </div>
   <nav class="flex overflow-x-auto bg-sky-950/60" id="nav"></nav>
@@ -116,7 +127,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
      <div class="flex justify-between items-center p-4 border-2 border-sky-200 bg-sky-50 rounded-2xl"><b class="text-sky-900">TỔNG ĐIỂM</b><b id="s-total" class="text-4xl text-sky-700"></b></div>
      <label class="text-sm font-bold block">Kết quả, sản phẩm nổi trội / vượt mức (bắt buộc nếu đề xuất HTXS)<textarea id="s-note" rows="3" class="ti mt-1" onchange="saveNote(this.value)"></textarea></label>
      <div class="grid grid-cols-2 gap-2"><button onclick="preview('II')" class="bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-xl font-bold"><i class="fas fa-eye"></i> XEM TRƯỚC PHỤ LỤC II</button>
-     <button onclick="preview('II',true)" class="bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold"><i class="fas fa-file-word"></i> TẢI VỀ (.doc)</button></div>
+     <button onclick="downloadDoc()" class="bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold"><i class="fas fa-file-word"></i> TẢI VỀ (.doc)</button></div>
     </div>
     <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col">
      <p class="text-[11px] font-bold text-slate-400 uppercase text-center">Mức xếp loại tự đề xuất</p>
@@ -131,7 +142,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
   <section id="v-reports" class="max-w-[1600px] mx-auto space-y-5 hide">
    <div class="bg-white rounded-2xl border border-slate-200 p-6 border-t-8 border-emerald-600 flex flex-wrap justify-between items-center gap-3">
     <div><h2 class="text-xl font-black"><i class="fas fa-chart-line text-emerald-600"></i> PHỤ LỤC III: TỔNG HỢP & KIỂM SOÁT TỶ LỆ HTXS (≤ 20% số người HTT)</h2><p id="quota-line" class="text-sm text-slate-500 font-semibold"></p></div>
-    <div class="flex gap-2"><button onclick="preview('III')" class="bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl"><i class="fas fa-eye"></i> Xem trước</button><button onclick="preview('III',true)" class="bg-slate-700 text-white font-bold py-2.5 px-5 rounded-xl"><i class="fas fa-file-excel"></i> Tải về (.xls)</button></div>
+    <div class="flex gap-2"><button onclick="preview('III')" class="bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl"><i class="fas fa-eye"></i> Xem trước</button><button onclick="downloadExcel()" class="bg-slate-700 text-white font-bold py-2.5 px-5 rounded-xl"><i class="fas fa-file-excel"></i> Tải về (.xls)</button></div>
    </div>
    <div class="bg-white rounded-2xl border overflow-x-auto"><table class="w-full text-sm min-w-[1000px]"><thead><tr><th>TT</th><th>Họ tên</th><th>Chức vụ / Tổ</th><th>Phiếu</th><th>Số NV</th><th>KPI</th><th>Tiêu chí</th><th>Tổng điểm</th><th>NV vượt</th><th>NV chậm</th><th>Cá nhân đề xuất</th><th>Đơn vị đề xuất</th></tr></thead><tbody id="rep-body"></tbody></table></div>
   </section>
@@ -163,19 +174,19 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
     <div class="overflow-x-auto max-h-80"><table class="w-full text-xs"><tbody id="audit-body"></tbody></table></div>
    </div>
    <div class="bg-white rounded-2xl p-6 border-t-8 border-sky-800 shadow-sm">
-    <h2 class="font-black text-lg mb-3"><i class="fas fa-users-cog text-sky-600"></i> TÀI KHOẢN</h2>
+    <h2 class="font-black text-lg mb-3"><i class="fas fa-users-cog text-sky-600"></i> TÀI KHOẢN & MẬT KHẨU</h2>
     <form id="user-form" onsubmit="saveUser(event)" class="grid md:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl mb-4">
      <input type="hidden" id="e-id">
      <input id="e-name" required class="ti md:col-span-2" placeholder="Họ và tên">
-     <input id="e-job" required class="ti" placeholder="Chức vụ (VD: Giáo viên, Phó Hiệu trưởng)">
+     <input id="e-job" required class="ti" placeholder="Chức vụ (VD: Giáo viên, P.Hiệu trưởng)">
      <select id="e-role" class="ti"><option value="gv">Giáo viên / Nhân viên</option><option value="tt">Tổ trưởng</option><option value="bgh">Ban Giám Hiệu</option><option value="tk">Thư ký / Văn thư</option><option value="admin">Quản trị viên</option></select>
      <select id="e-dept" class="ti"></select>
      <select id="e-manager" class="ti" title="Người duyệt trực tiếp"></select>
-     <input id="e-user" class="hide">
-     <input id="e-email" type="email" required class="ti md:col-span-2" placeholder="Email Google đăng nhập">
-     <div class="md:col-span-3 text-right mt-2"><button type="button" onclick="document.getElementById('user-form').reset();$('e-id').value=''" class="px-4 py-2 bg-slate-200 rounded-lg font-bold">Hủy</button> <button class="px-6 py-2 bg-sky-800 text-white rounded-lg font-bold">LƯU</button></div>
+     <input id="e-email" type="email" required class="ti md:col-span-2" placeholder="Email đăng nhập nội bộ (VD: gv.abc@daksong.edu.vn)">
+     <input id="e-pass" type="text" class="ti" placeholder="Mật khẩu khởi tạo (mặc định 123456)">
+     <div class="md:col-span-3 text-right mt-2"><button type="button" onclick="document.getElementById('user-form').reset();$('e-id').value=''" class="px-4 py-2 bg-slate-200 rounded-lg font-bold">Hủy</button> <button class="px-6 py-2 bg-sky-800 text-white rounded-lg font-bold">LƯU TÀI KHOẢN</button></div>
     </form>
-    <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Họ tên</th><th>Email</th><th>Vai trò / Tổ</th><th>Duyệt bởi</th><th></th></tr></thead><tbody id="user-body"></tbody></table></div>
+    <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Họ tên</th><th>Email đăng nhập</th><th>Vai trò / Tổ</th><th>Duyệt bởi</th><th></th></tr></thead><tbody id="user-body"></tbody></table></div>
    </div>
   </section>
  </main>
@@ -194,7 +205,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
 <div id="mprev" class="hide fixed inset-0 z-[300] flex flex-col bg-slate-900/80 p-3">
  <div class="bg-white rounded-t-xl p-3 flex flex-wrap justify-between items-center gap-2">
   <b id="prev-title"></b>
-  <div class="flex gap-2"><button onclick="printPrev()" class="px-4 py-2 bg-slate-200 rounded-lg font-bold"><i class="fas fa-print"></i> In / PDF</button><button onclick="downloadPrev()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold"><i class="fas fa-download"></i> Tải về</button><button onclick="$('mprev').classList.add('hide')" class="px-4 py-2 bg-red-500 text-white rounded-lg font-bold">Đóng</button></div>
+  <div class="flex gap-2"><button onclick="printPrev()" class="px-4 py-2 bg-slate-200 rounded-lg font-bold"><i class="fas fa-print"></i> In / PDF</button><button onclick="$('mprev').classList.add('hide')" class="px-4 py-2 bg-red-500 text-white rounded-lg font-bold">Đóng</button></div>
  </div>
  <iframe id="prev-frame" class="flex-grow bg-white rounded-b-xl w-full"></iframe>
 </div>
@@ -246,21 +257,41 @@ const can=p=>!!me && (me.role==='admin'?false:!!(perms[me.role]||{})[p]);
 const log=(a,d)=>cref('audit_logs').add({at:Date.now(),by:me.id,byName:me.fullName,target:viewUid||null,action:a,detail:d||''}).catch(()=>{});
 
 let periods=[], cur={id:'', name:'', status:'locked', config: DEFAULT_PERIOD_CONFIG};
-let perms=DEFPERMS, rawDocs=[], me=null, users=[], depts=[], viewUid=null, viewUser=null, tasks=[], docInfo={}, allDocs=[], unsubs=[], mode='self', prev=null;
+let perms=DEFPERMS, rawDocs=[], me=null, users=[], depts=[], viewUid=null, viewUser=null, tasks=[], docInfo={}, allDocs=[], unsubs=[], mode='self';
 
 function newDoc(){
   const tcData = cur.config.tc30Template.map(t => ({ id: t.id, violations: 0, score: t.maxScore }));
   return { status:'DRAFT', generalScore: cur.config.generalRatio, extraDeduct: 0, note:'', tc30Data: tcData };
 }
 
-const BOOT_ADMIN='nguyenvandao0997@gmail.com'; 
+const BOOT_ADMIN_EMAIL='admin@daksong.edu.vn';
 let started=false;
 
-// Đổi sang signInWithRedirect để tránh bị chặn trình duyệt
-const googleLogin = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider).catch(e => toast('Lỗi đăng nhập: ' + e.message, 'error'));
-};
+async function handleLogin(e){
+ e.preventDefault();
+ const email=$('l-email').value.trim().toLowerCase();
+ const pass=$('l-pass').value.trim();
+ try{
+  const l=toast('Đang xác thực...','info',true);
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(err) {
+    if(email === BOOT_ADMIN_EMAIL && pass === '123456'){
+      try {
+        await auth.createUserWithEmailAndPassword(email, pass);
+      } catch(ex){
+        await auth.signInWithEmailAndPassword(email, pass);
+      }
+    } else {
+      l.remove();
+      return toast('Sai email hoặc mật khẩu!','error');
+    }
+  }
+  l.remove();
+ }catch(err){
+  toast('Lỗi đăng nhập: '+err.message,'error');
+ }
+}
 
 auth.onAuthStateChanged(async u=>{
  if(!u)return;
@@ -268,12 +299,17 @@ auth.onAuthStateChanged(async u=>{
  try{
   let m=await dref('emails',email).get();
   if(!m.exists){
-   if(email!==BOOT_ADMIN.toLowerCase()){toast('Email '+email+' chưa được cấp quyền!','error');return auth.signOut()}
-   await dref('users','admin1').set({fullName:u.displayName||'Quản trị viên',jobTitle:'Quản trị hệ thống',role:'admin',dept:'BGH',email},{merge:true});
-   await dref('emails',email).set({userId:'admin1',role:'admin'});m=await dref('emails',email).get();
+   if(email===BOOT_ADMIN_EMAIL.toLowerCase()){
+     await dref('users','admin1').set({fullName:'Quản trị viên Hệ thống',jobTitle:'Quản trị viên',role:'admin',dept:'BGH',email},{merge:true});
+     await dref('emails',email).set({userId:'admin1',role:'admin'});
+     m=await dref('emails',email).get();
+   } else {
+     toast('Tài khoản chưa được cấu hình trong hệ thống!','error');
+     return auth.signOut();
+   }
   }
   start(m.data().userId);
- }catch(e){toast('Lỗi: '+e.message,'error');auth.signOut()}
+ }catch(e){toast('Lỗi hệ thống: '+e.message,'error');auth.signOut()}
 });
 
 function start(uid){
@@ -345,7 +381,7 @@ async function saveProfile(e){
 /* ================= ĐĂNG KÝ / GIAO VIỆC ================= */
 function fillRegister(){
  $('r-axis').innerHTML=AXES.map((a,i)=>`<option value="${i}">${esc(a.split(' - ')[0])}</option>`).join('');
- $('r-cat').innerHTML='<option value="">-- Chọn từ danh mục mẫu (hoặc tự nhập bên dưới) --</option>'+CAT.map((c,i)=>`<option value="${i}">[${AXES[c[0]].split(' - ')[0]}] ${esc(c[1])} (N${c[2]})</option>`).join('');
+ $('r-cat').innerHTML='<option value="">-- Chọn từ danh mục mẫu --</option>'+CAT.map((c,i)=>`<option value="${i}">[${AXES[c[0]].split(' - ')[0]}] ${esc(c[1])} (N${c[2]})</option>`).join('');
 }
 function fillCat(){const c=CAT[$('r-cat'].value];if(!c)return;$('r-axis').value=c[0];$('r-name').value=c[1];$('r-group').value=c[2]}
 
@@ -472,7 +508,7 @@ function open30(){
 }
 function tcRead(){const d={};cur.config.tc30Template.forEach(t=>d[t.id]=Math.max(0,parseInt($('tcv_'+t.id).value)||0));return d}
 function calc30(){const d=tcRead(),r=tcScore(d);
- cur.config.tc30Template.forEach(t=>{const v=d[t.id];$('tcv_'+t.id).value=v;$('tcs_'+t.id).textContent=Math.max(0,t.maxScore-v);const o=$('tcok_'+t.id);o.textContent=v?'Không đảm bảo':'Ensured';o.className='bd ml-2 '+(v?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700')});
+ cur.config.tc30Template.forEach(t=>{const v=d[t.id];$('tcv_'+t.id).value=v;$('tcs_'+t.id).textContent=Math.max(0,t.maxScore-v);const o=$('tcok_'+t.id);o.textContent=v?'Không đảm bảo':'Đảm bảo';o.className='bd ml-2 '+(v?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700')});
  $('tc-total').textContent=`${r.s} / ${cur.config.generalRatio}`;$('tc-extra').textContent=r.x;
 }
 async function save30(){
@@ -483,7 +519,7 @@ async function save30(){
  $('m30').classList.add('hide');toast('Đã lưu tiêu chí chung!');
 }
 
-/* ================= PHỤ LỤC III ================= */
+/* ================= PHỤ LỤC III & XUẤT FILE CHUẨN ================= */
 function reportData(){
  const rows=subordinates().map(u=>{const d=allDocs.find(x=>x.id===u.id)||{status:'DRAFT',generalScore:cur.config.generalRatio,kpi:0,total:0,n:0,over:0,late:0,rating:'Chưa đánh giá'};return{u,d,fin:d.status==='FINALIZED'}});
  const htt=rows.filter(r=>r.fin&&(r.d.total||0)>=70).length,quota=Math.round(htt*0.2+1e-9);
@@ -497,6 +533,52 @@ function renderReports(){
  const R=reportData();
  $('quota-line').textContent=`Số người HTT: ${R.htt} → tối đa ${R.quota} HTXS | Đủ điều kiện: ${R.elig.length} | Đề xuất: ${R.chosen.size}.`;
  $('rep-body').innerHTML=R.rows.map((r,i)=>`<tr><td class="text-center">${i+1}</td><td class="font-bold">${esc(r.u.fullName)}</td><td class="text-xs">${esc(r.u.jobTitle||'GV')} - ${esc(r.u.dept||'')}</td><td><span class="bd ${ST[r.d.status||'DRAFT'][1]}">${ST[r.d.status||'DRAFT'][0]}</span></td><td class="text-center">${r.d.n||0}</td><td class="text-center font-bold text-emerald-600">${f2(r.d.kpi)}</td><td class="text-center">${r.d.generalScore ?? cur.config.generalRatio}</td><td class="text-center font-black text-amber-600">${f2(r.d.total)}</td><td class="text-center">${r.d.over||0}</td><td class="text-center">${r.d.late||0}</td><td class="text-xs">${esc(r.d.rating||'---')}</td><td class="text-xs font-bold ${r.prop===RATE.X?'text-sky-700':''}">${esc(r.prop)}</td></tr>`).join('')||'<tr><td colspan="12" class="text-center py-6 text-slate-400">Không có cấp dưới.</td></tr>';
+}
+
+function preview(t){
+ const u=viewUser||me;const c=calc(tasks);const gen=docInfo.generalScore ?? cur.config.generalRatio, ex=docInfo.extraDeduct||0, total=gen+c.kpi-ex, rt=rate(total,c,docInfo.note);
+ let html=`<html lang="vi"><head><meta charset="utf-8"><style>body{font-family:'Times New Roman',serif;font-size:14px;line-height:1.5;padding:20px}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #000;padding:5px;text-align:center}th{background:#f2f2f2}</style></head><body>`;
+ if(t==='II'){
+  html+=`<h3 style="text-align:center">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3><h4 style="text-align:center">Độc lập - Tự do - Hạnh phúc</h4><hr style="width:30%"><h2 style="text-align:center;margin-top:20px">BẢNG ĐÁNH GIÁ, XẾP LOẠI HIỆU SUẤT CÔNG TÁC (PHỤ LỤC II)</h2>
+  <p><b>Họ và tên:</b> ${esc(u.fullName)} | <b>Chức vụ/Tổ:</b> ${esc(u.jobTitle||'')} - ${esc(u.dept||'')} | <b>Kỳ:</b> ${esc(cur.name)}</p>
+  <table><thead><tr><th>TT</th><th>Nội dung nhiệm vụ</th><th>Nhóm</th><th>Điểm chuẩn</th><th>Sản phẩm / SL</th><th>Thời hạn</th><th>Đã HT (%)</th><th>KPI quy đổi</th></tr></thead><tbody>`;
+  tasks.forEach((tsk,i)=>{html+=`<tr><td>${i+1}</td><td style="text-align:left">${esc(tsk.name)}</td><td>N${tsk.group}</td><td>${cur.config.baseGroups[tsk.group]}</td><td style="text-align:left">${esc(tsk.product)}</td><td>${vd(tsk.deadline)}</td><td>${tsk.completion}%</td><td>${f2((cur.config.baseGroups[tsk.group]*(tsk.completion||100)/100)/cur.config.baseGroups[tsk.group]*cur.config.kpiRatio/tasks.length)}</td></tr>`});
+  html+=`</tbody></table><p style="margin-top:15px"><b>Tổng điểm KPI:</b> ${f2(c.kpi)} | <b>Tiêu chí chung:</b> ${gen} | <b>Tổng điểm:</b> ${f2(total)} | <b>Xếp loại đề xuất:</b> ${RATE[rt.k]}</p></body></html>`;
+ } else {
+  const R=reportData();
+  html+=`<h3 style="text-align:center">TRƯỜNG PTDTNT THCS & THPT ĐẮK SONG</h3><h2 style="text-align:center">PHỤ LỤC III: TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI (${esc(cur.name)})</h2>
+  <table><thead><tr><th>TT</th><th>Họ tên</th><th>Chức vụ / Tổ</th><th>Số NV</th><th>Điểm KPI</th><th>Tiêu chí</th><th>Tổng điểm</th><th>Đơn vị đề xuất</th></tr></thead><tbody>`;
+  R.rows.forEach((r,i)=>{html+=`<tr><td>${i+1}</td><td style="text-align:left">${esc(r.u.fullName)}</td><td style="text-align:left">${esc(r.u.jobTitle||'')} - ${esc(r.u.dept||'')}</td><td>${r.d.n||0}</td><td>${f2(r.d.kpi)}</td><td>${r.d.generalScore??cur.config.generalRatio}</td><td><b>${f2(r.d.total)}</b></td><td><b>${esc(r.prop)}</b></td></tr>`});
+  html+=`</tbody></table></body></html>`;
+ }
+ $('prev-title').textContent="Xem trước biểu mẫu";$('prev-frame').srcdoc=html;$('mprev').classList.remove('hide');
+}
+function printPrev(){window.frames['prev-frame'].focus();window.frames['prev-frame'].print()}
+
+function downloadDoc(){
+ const u=viewUser||me;const c=calc(tasks);const gen=docInfo.generalScore ?? cur.config.generalRatio, total=gen+c.kpi-(docInfo.extraDeduct||0), rt=rate(total,c,docInfo.note);
+ let html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Phụ lục II</title><style>body{font-family:'Times New Roman',serif;font-size:13pt;line-height:1.3}table{width:100%;border-collapse:collapse}th,td{border:1px solid windowtext;padding:4px;font-size:11pt}</style></head><body>`;
+ html+=`<div style="text-align:center"><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b><br><b>Độc lập - Tự do - Hạnh phúc</b><hr style="width:30%"></div>`;
+ html+=`<h3 style="text-align:center">BẢNG TỰ ĐÁNH GIÁ, XẾP LOẠI HIỆU SUẤT CÔNG TÁC (PHỤ LỤC II)</h3>`;
+ html+=`<p><b>Họ và tên:</b> ${esc(u.fullName)}<br><b>Chức vụ / Tổ:</b> ${esc(u.jobTitle||'')} - ${esc(u.dept||'')}<br><b>Kỳ đánh giá:</b> ${esc(cur.name)}</p>`;
+ html+=`<table><thead><tr><th>TT</th><th>Nội dung nhiệm vụ</th><th>Nhóm</th><th>Điểm chuẩn</th><th>Sản phẩm</th><th>Thời hạn</th><th>Đã HT (%)</th><th>KPI quy đổi</th></tr></thead><tbody>`;
+ tasks.forEach((tsk,i)=>{html+=`<tr><td style="text-align:center">${i+1}</td><td>${esc(tsk.name)}</td><td style="text-align:center">N${tsk.group}</td><td style="text-align:center">${cur.config.baseGroups[tsk.group]}</td><td>${esc(tsk.product)}</td><td style="text-align:center">${vd(tsk.deadline)}</td><td style="text-align:center">${tsk.completion}%</td><td style="text-align:center">${f2(tsk.kpi||0)}</td></tr>`});
+ html+= `</tbody></table><br><p><b>1. Điểm Tiêu chí chung:</b> ${gen} / ${cur.config.generalRatio}<br><b>2. Điểm KPI:</b> ${f2(c.kpi)} / ${cur.config.kpiRatio}<br><b>TỔNG ĐIỂM:</b> ${f2(total)}<br><b>Mức xếp loại đề xuất:</b> ${RATE[rt.k]}<br><b>Sản phẩm nổi trội:</b> ${esc(docInfo.note||'Không có')}</p>`;
+ html+=`<br><table style="border:none"><tr><td style="border:none;text-align:center;width:50%"><b>Ý kiến của Tổ chuyên môn</b></td><td style="border:none;text-align:center;width:50%"><b>Người tự đánh giá</b><br>(Ký, ghi rõ họ tên)</td></tr></table>`;
+ html+=`</body></html>`;
+ const blob=new Blob(['\ufeff'+html],{type:'application/msword'});const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download=`PhuLuc_II_${u.fullName.replace(/\s+/g,'_')}.doc`;a.click();
+}
+
+function downloadExcel(){
+ const R=reportData();
+ let html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'></head><body>`;
+ html+=`<h3>PHỤ LỤC III: TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ XẾP LOẠI (${esc(cur.name)})</h3>`;
+ html+=`<table border="1"><thead><tr style="background:#002060;color:#fff"><th>TT</th><th>Họ tên</th><th>Chức vụ / Tổ</th><th>Số NV</th><th>Điểm KPI</th><th>Tiêu chí</th><th>Tổng điểm</th><th>Đơn vị đề xuất</th></tr></thead><tbody>`;
+ R.rows.forEach((r,i)=>{html+=`<tr><td>${i+1}</td><td>${esc(r.u.fullName)}</td><td>${esc(r.u.jobTitle||'')} - ${esc(r.u.dept||'')}</td><td>${r.d.n||0}</td><td>${f2(r.d.kpi)}</td><td>${r.d.generalScore??cur.config.generalRatio}</td><td><b>${f2(r.d.total)}</b></td><td><b>${esc(r.prop)}</b></td></tr>`});
+ html+=`</tbody></table></body></html>`;
+ const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'});const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download=`PhuLuc_III_${cur.name.replace(/\s+/g,'_')}.xls`;a.click();
 }
 
 /* ================= QUẢN TRỊ & TÀI KHOẢN ================= */
@@ -545,6 +627,7 @@ async function saveUser(e) {
     const id = $('e-id').value || 'u_' + Date.now();
     const old = users.find(u => u.id === id);
     const email = $('e-email').value.trim().toLowerCase();
+    const pass = $('e-pass').value.trim() || '123456';
     
     const d = {
         fullName: $('e-name').value.trim(), 
@@ -561,12 +644,18 @@ async function saveUser(e) {
     try {
         await dref('users', id).set(d, {merge: true});
         await dref('emails', email).set({userId: id, role: d.role, dept: d.dept});
+        
+        try {
+            await auth.createUserWithEmailAndPassword(email, pass);
+        } catch(ex) {}
+
         if(old?.email && old.email.toLowerCase() !== email) {
             await dref('emails', old.email.toLowerCase()).delete();
         }
         log('Lưu tài khoản', d.fullName);
-        toast('Đã lưu tài khoản!');
-        $('user-form').reset();$('e-id').value = '';
+        toast('Đã lưu tài khoản & mật khẩu!');
+        $('user-form').reset();
+        $('e-id').value = '';$('e-pass').value = '';
     } catch(x) {
         toast('Lỗi: ' + x.message, 'error');
     }
@@ -579,7 +668,7 @@ function editUser(id) {
     $('e-name').value = u.fullName; 
     $('e-job').value = u.jobTitle \vert{}\vert{} '';$('e-role').value = u.role; 
     $('e-dept').value = u.dept \vert{}\vert{} '';$('e-email').value = u.email || '';
-    if($('e-manager'))$('e-manager').value = u.managerId || '';
+    if($('e-manager')) $('e-manager').value = u.managerId \vert{}\vert{} '';$('e-pass').value = '';
 }
 
 async function delUser(id) {
@@ -593,8 +682,6 @@ async function delUser(id) {
         }
     }
 }
-
-function preview(){ alert("Tính năng xuất file đang được nâng cấp trong Giai đoạn 3."); }
 </script>
 </body>
 </html>
