@@ -321,7 +321,7 @@ function navTo(n){
 }
 
 /* ================= HỒ SƠ ================= */
-function fillProfile(){$('p-name').value=me.fullName||'';$('p-dob').value=me.dob\vert{}\vert{}'';$('p-job').value=(me.jobTitle||'')+' - '+(me.dept||'');$('p-subject').value=me.subject\vert{}\vert{}'';$('p-duties').value=me.duties||''}
+function fillProfile(){$('p-name').value=me.fullName||'';$('p-dob').value=me.dob||'';$('p-job').value=(me.jobTitle||'')+' - '+(me.dept||'');$('p-subject').value=me.subject||'';$('p-duties').value=me.duties||''}
 async function saveProfile(e){e.preventDefault();const d={fullName:$('p-name').value.trim(),dob:$('p-dob').value,subject:$('p-subject').value.trim(),duties:$('p-duties').value.trim()};
  try{await dref('users',me.id).update(d);$('u-name').textContent=d.fullName;toast('Đã cập nhật!')}catch(x){toast('Lỗi cập nhật!','error')}}
 
