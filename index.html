@@ -488,7 +488,7 @@ async function upd(id,f,el){
  try{await cref('kpi_tasks').doc(id).update({[f]:v})}catch(e){toast('Lỗi lưu!','error')}
 }
 async function addBlank(){if(!perm().edit)return;await cref('kpi_tasks').add(mkTask(viewUid))}
-async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}}
+async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}
 async function saveNote(v){await kset(viewUid,{note:v})}
 
 async function upload(id){
