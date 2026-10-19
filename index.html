@@ -271,8 +271,8 @@ async function handleLogin(e){
  e.preventDefault();
  const email=$('l-email').value.trim().toLowerCase();
  const pass=$('l-pass').value.trim();
+ const l=toast('Đang xử lý đăng nhập...','info',true);
  try{
-  const l=toast('Đang xác thực...','info',true);
   try {
     await auth.signInWithEmailAndPassword(email, pass);
   } catch(err) {
@@ -283,13 +283,13 @@ async function handleLogin(e){
         await auth.signInWithEmailAndPassword(email, pass);
       }
     } else {
-      l.remove();
-      return toast('Sai email hoặc mật khẩu!','error');
+      await auth.createUserWithEmailAndPassword(email, pass);
     }
   }
   l.remove();
  }catch(err){
-  toast('Lỗi đăng nhập: '+err.message,'error');
+  l.remove();
+  toast('Lỗi: '+err.message,'error');
  }
 }
 
@@ -299,14 +299,13 @@ auth.onAuthStateChanged(async u=>{
  try{
   let m=await dref('emails',email).get();
   if(!m.exists){
-   if(email===BOOT_ADMIN_EMAIL.toLowerCase()){
-     await dref('users','admin1').set({fullName:'Quản trị viên Hệ thống',jobTitle:'Quản trị viên',role:'admin',dept:'BGH',email},{merge:true});
-     await dref('emails',email).set({userId:'admin1',role:'admin'});
-     m=await dref('emails',email).get();
-   } else {
-     toast('Tài khoản chưa được cấu hình trong hệ thống!','error');
-     return auth.signOut();
-   }
+   const uid = (email === BOOT_ADMIN_EMAIL.toLowerCase()) ? 'admin1' : 'u_' + Date.now();
+   const role = (email === BOOT_ADMIN_EMAIL.toLowerCase()) ? 'admin' : 'gv';
+   const fullName = (email === BOOT_ADMIN_EMAIL.toLowerCase()) ? 'Quản trị viên Hệ thống' : email.split('@')[0];
+   
+   await dref('users',uid).set({fullName, jobTitle: role==='admin'?'Quản trị viên':'Giáo viên', role, dept: 'Ban Giám Hiệu', email},{merge:true});
+   await dref('emails',email).set({userId:uid, role});
+   m=await dref('emails',email).get();
   }
   start(m.data().userId);
  }catch(e){toast('Lỗi hệ thống: '+e.message,'error');auth.signOut()}
@@ -632,7 +631,7 @@ async function saveUser(e) {
     const d = {
         fullName: $('e-name').value.trim(), 
         jobTitle: $('e-job').value.trim(), 
-        role: $('e-role').value, 
+        role: $('e-role'.value), 
         dept: $('e-dept').value, 
         managerId: $('e-manager') ?$('e-manager').value : null,
         email: email
