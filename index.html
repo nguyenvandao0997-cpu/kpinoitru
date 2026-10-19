@@ -41,8 +41,8 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
   
   <form onsubmit="handleLogin(event)" class="space-y-4">
    <div>
-    <label class="text-xs font-bold text-slate-700">Email đăng nhập</label>
-    <input id="l-email" type="email" required class="ti mt-1" placeholder="admin@daksong.edu.vn">
+    <label class="text-xs font-bold text-slate-700">Tài khoản / Email đăng nhập</label>
+    <input id="l-email" type="text" required class="ti mt-1" placeholder="Admin hoặc email của bạn">
    </div>
    <div>
     <label class="text-xs font-bold text-slate-700">Mật khẩu</label>
@@ -50,7 +50,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
    </div>
    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-black py-3 rounded-xl shadow-lg transition"><i class="fas fa-sign-in-alt mr-2"></i> ĐĂNG NHẬP HỆ THỐNG</button>
   </form>
-  <p class="text-[11px] text-slate-400 text-center mt-4">Sử dụng tài khoản do Quản trị viên nhà trường cấp.</p>
+  <p class="text-[11px] text-slate-400 text-center mt-4">Tài khoản quản trị mặc định: <b>Admin</b> | Mật khẩu: <b>123456</b></p>
  </div>
 </div>
 
@@ -86,7 +86,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
   <!-- ĐĂNG KÝ / GIAO VIỆC -->
   <section id="v-register" class="max-w-4xl mx-auto hide">
    <form onsubmit="addTask(event)" class="bg-white rounded-2xl border border-slate-200 p-6 border-t-8 border-sky-700 space-y-4">
-    <h2 class="text-xl font-black"><i class="fas fa-sitemap text-sky-700"></i> Đăng ký nhiệm vụ theo 6 trục & giao việc</h2>
+    <h2 class="text-xl font-black"><i class="fas fa-sitemap text-sky-700"></i> Đăng ký nhiệm vụ theo các trục & giao việc</h2>
     <p class="text-sm text-slate-500">Nhiệm vụ thêm vào sẽ vào thẳng Phụ lục II của người nhận. Mỗi sản phẩm chỉ chấm một dòng, một trục chính (không chấm trùng).</p>
     <select id="r-cat" class="ti" onchange="fillCat()"></select>
     <div class="grid sm:grid-cols-4 gap-3">
@@ -149,13 +149,19 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
 
   <!-- QUẢN TRỊ -->
   <section id="v-admin" class="max-w-6xl mx-auto space-y-6 hide">
-   <div class="bg-white rounded-2xl p-6 border-t-8 border-emerald-600 shadow-sm">
-    <h2 class="font-black text-lg mb-3"><i class="fas fa-sitemap text-emerald-600"></i> QUẢN LÝ TỔ / BỘ PHẬN</h2>
-    <div class="flex gap-2 mb-3"><input id="new-dept" class="ti" placeholder="Tên tổ mới"><button onclick="addDept()" class="bg-emerald-600 text-white px-5 rounded-lg font-bold whitespace-nowrap">Thêm tổ</button></div>
-    <div id="dept-list" class="flex flex-wrap gap-2"></div>
+   <!-- THIẾT LẬP TRỤC NHIỆM VỤ HỆ THỐNG -->
+   <div class="bg-white rounded-2xl p-6 border-t-8 border-sky-600 shadow-sm">
+    <h2 class="font-black text-lg mb-3"><i class="fas fa-list-alt text-sky-600"></i> THIẾT LẬP TRỤC NHIỆM VỤ TOÀN HỆ THỐNG</h2>
+    <div class="flex gap-2 mb-3">
+     <input id="new-axis-name" class="ti" placeholder="Tên trục mới (VD: TRỤC VII - ...)">
+     <button onclick="addSystemAxis()" class="bg-sky-600 text-white px-5 rounded-lg font-bold whitespace-nowrap">Thêm trục</button>
+    </div>
+    <div id="axes-list" class="space-y-2"></div>
    </div>
+
+   <!-- KỲ ĐÁNH GIÁ (QUÝ, NĂM) -->
    <div class="bg-white rounded-2xl p-6 border-t-8 border-amber-500 shadow-sm">
-    <h2 class="font-black text-lg mb-3"><i class="fas fa-calendar-check text-amber-500"></i> KỲ ĐÁNH GIÁ</h2>
+    <h2 class="font-black text-lg mb-3"><i class="fas fa-calendar-check text-amber-500"></i> THIẾT LẬP KỲ ĐÁNH GIÁ (QUÝ, NĂM)</h2>
     <form onsubmit="addPeriod(event)" class="grid md:grid-cols-5 gap-2 bg-slate-50 p-3 rounded-xl mb-3">
      <input id="pe-name" required class="ti md:col-span-2" placeholder="Tên kỳ (VD: Quý IV năm 2026)">
      <label class="text-xs font-bold">Ngày chốt kết quả<input id="pe-cutoff" type="date" required class="ti"></label>
@@ -165,14 +171,25 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
     </form>
     <table class="w-full text-sm"><tbody id="period-list"></tbody></table>
    </div>
+
+   <!-- QUẢN LÝ TỔ / BỘ PHẬN -->
+   <div class="bg-white rounded-2xl p-6 border-t-8 border-emerald-600 shadow-sm">
+    <h2 class="font-black text-lg mb-3"><i class="fas fa-sitemap text-emerald-600"></i> QUẢN LÝ TỔ / BỘ PHẬN</h2>
+    <div class="flex gap-2 mb-3"><input id="new-dept" class="ti" placeholder="Tên tổ mới"><button onclick="addDept()" class="bg-emerald-600 text-white px-5 rounded-lg font-bold whitespace-nowrap">Thêm tổ</button></div>
+    <div id="dept-list" class="flex flex-wrap gap-2"></div>
+   </div>
+
+   <!-- PHÂN QUYỀN VÀ TÀI KHOẢN -->
    <div class="bg-white rounded-2xl p-6 border-t-8 border-indigo-600 shadow-sm">
     <h2 class="font-black text-lg mb-1"><i class="fas fa-user-shield text-indigo-600"></i> PHÂN QUYỀN THEO VAI TRÒ</h2>
     <table class="w-full text-sm"><thead><tr id="perm-head"></tr></thead><tbody id="perm-body"></tbody></table>
    </div>
+
    <div class="bg-white rounded-2xl p-6 border-t-8 border-slate-500 shadow-sm">
     <h2 class="font-black text-lg mb-3"><i class="fas fa-clock-rotate-left text-slate-500"></i> NHẬT KÝ THAO TÁC (100 mới nhất)</h2>
     <div class="overflow-x-auto max-h-80"><table class="w-full text-xs"><tbody id="audit-body"></tbody></table></div>
    </div>
+
    <div class="bg-white rounded-2xl p-6 border-t-8 border-sky-800 shadow-sm">
     <h2 class="font-black text-lg mb-3"><i class="fas fa-users-cog text-sky-600"></i> TÀI KHOẢN & MẬT KHẨU</h2>
     <form id="user-form" onsubmit="saveUser(event)" class="grid md:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl mb-4">
@@ -231,7 +248,16 @@ const DEFAULT_PERIOD_CONFIG = {
   ]
 };
 
-const AXES=["TRỤC I - Giảng dạy, kiểm tra đánh giá, hồ sơ dữ liệu","TRỤC II - Chất lượng học sinh (phụ đạo, bồi dưỡng, ôn thi)","TRỤC III - Sinh hoạt chuyên môn, chuyên đề, STEM/KHKT","TRỤC IV - Công tác chủ nhiệm lớp","TRỤC V - Tư vấn học đường, quản lý nội trú, văn hóa","TRỤC VI - Chuyển đổi số, sáng kiến, hoạt động giáo dục, QP-AN"];
+const DEFAULT_AXES=[
+  "TRỤC I - Giảng dạy, kiểm tra đánh giá, hồ sơ dữ liệu",
+  "TRỤC II - Chất lượng học sinh (phụ đạo, bồi dưỡng, ôn thi)",
+  "TRỤC III - Sinh hoạt chuyên môn, chuyên đề, STEM/KHKT",
+  "TRỤC IV - Công tác chủ nhiệm lớp",
+  "TRỤC V - Tư vấn học đường, quản lý nội trú, văn hóa",
+  "TRỤC VI - Chuyển đổi số, sáng kiến, hoạt động giáo dục, QP-AN"
+];
+let AXES = [...DEFAULT_AXES];
+
 const CAT=[[0,"Thực hiện đầy đủ chương trình, kế hoạch giáo dục môn học",1],[0,"Xây dựng và thực hiện kế hoạch bài dạy; chuẩn bị học liệu, thiết bị",1],[0,"Đổi mới phương pháp dạy học, tổ chức hoạt động học tích cực",2],[0,"Kiểm tra, đánh giá; xây dựng ma trận, đặc tả, đề, đáp án",2],[0,"Nhập điểm, nhận xét, cập nhật VNEDU, học bạ số, hồ sơ điện tử",1],[1,"Khảo sát, phân tích, phân loại học sinh theo kết quả học tập",2],[1,"Phụ đạo học sinh chưa đạt/yếu",3],[1,"Bồi dưỡng học sinh giỏi",3],[1,"Xây dựng và thực hiện giải pháp nâng cao chất lượng môn/lớp",2],[2,"Tham gia sinh hoạt tổ/nhóm, nghiên cứu bài học, dự giờ",1],[2,"Xây dựng/thực hiện chuyên đề cấp tổ",2],[2,"Hướng dẫn học sinh làm sản phẩm STEM, dự án KHKT",3],[3,"Xây dựng và thực hiện kế hoạch chủ nhiệm; quản lý hồ sơ lớp",2],[3,"Theo dõi học tập, rèn luyện, chuyên cần; phối hợp gia đình",2],[3,"Sinh hoạt lớp định hướng HĐTNHN, giáo dục kỹ năng, nề nếp",2],[4,"Trực/quản lý học sinh nội trú theo lịch; theo dõi nề nếp",2],[4,"Tư vấn, hỗ trợ học sinh theo kế hoạch Tổ tư vấn",3],[4,"Tổ chức hoạt động giáo dục kỹ năng sống, văn hóa dân tộc",2],[5,"Báo cáo định kỳ, cập nhật kết quả nhiệm vụ, cung cấp minh chứng KPI",1],[5,"Ứng dụng AI, công nghệ số trong dạy học, học liệu số",2],[5,"Tuyên truyền phòng chống bạo lực học đường, ma túy, tệ nạn xã hội",2],[5,"Thực hiện nhiệm vụ phát sinh do Hiệu trưởng/BGH/Tổ trưởng giao",1]];
 const RATE={X:'Hoàn thành xuất sắc nhiệm vụ',T:'Hoàn thành tốt nhiệm vụ',H:'Hoàn thành nhiệm vụ',K:'Không hoàn thành nhiệm vụ'};
 const ST={DRAFT:['Đang soạn','bg-slate-200 text-slate-700'],PENDING_MANAGER:['Chờ duyệt','bg-amber-100 text-amber-800'],FINALIZED:['Đã chốt','bg-emerald-100 text-emerald-800']};
@@ -269,9 +295,13 @@ let started=false;
 
 async function handleLogin(e){
  e.preventDefault();
- const email=$('l-email').value.trim().toLowerCase();
- const pass=$('l-pass').value.trim();
- const l=toast('Đang xử lý đăng nhập...','info',true);
+ let rawInput = $('l-email').value.trim();
+ const pass = $('l-pass').value.trim();
+ if(rawInput.toLowerCase() === 'admin' || !rawInput.includes('@')){
+   rawInput = BOOT_ADMIN_EMAIL;
+ }
+ const email = rawInput.toLowerCase();
+ const l = toast('Đang xác thực...','info',true);
  try{
   try {
     await auth.signInWithEmailAndPassword(email, pass);
@@ -289,7 +319,7 @@ async function handleLogin(e){
   l.remove();
  }catch(err){
   l.remove();
-  toast('Lỗi: '+err.message,'error');
+  toast('Lỗi đăng nhập: '+err.message,'error');
  }
 }
 
@@ -316,6 +346,7 @@ function start(uid){
  cref('users').onSnapshot(s=>{users=s.docs.map(d=>({...d.data(),id:d.id}));const u=users.find(x=>x.id===uid);
   if(u){const first=!me;me=u;if(first)enterApp();else if(!$('v-admin').classList.contains('hide'))renderUsers()}});
  dref('config','departments').onSnapshot(s=>{if(s.exists)depts=s.data().list||[];else{depts=["Ban Giám Hiệu","Tổ Khoa học Xã hội","Tổ Khoa học Tự nhiên","Tổ Văn phòng"];if(me?.role==='admin')dref('config','departments').set({list:depts})}renderDepts()});
+ dref('config','axes').onSnapshot(s=>{if(s.exists)AXES=s.data().list||DEFAULT_AXES;else if(me?.role==='admin')dref('config','axes').set({list:DEFAULT_AXES});renderAxesConfig();if(me)fillRegister();render()});
  dref('config','roles').onSnapshot(s=>{perms=s.exists?{...DEFPERMS,...s.data().perms}:DEFPERMS;if(me){buildNav();$('t-'+mode)?.classList.add('on');renderPerms()}});
  
  cref('periods').onSnapshot(s=>{
@@ -349,7 +380,8 @@ function buildNav(){
  if(can('reports'))t.push(['reports','chart-pie','Tổng hợp (Phụ lục III)']);
  if(me.role==='admin')t.splice(0,3,['admin','cogs','Quản trị hệ thống']);
  $('nav').innerHTML=t.map(x=>`<div class="nt" id="t-${x[0]}" onclick="navTo('${x[0]}')"><i class="fas fa-${x[1]} mr-2"></i>${x[2]}</div>`).join('');
- $('assign-box').classList.toggle('hide',!(can('assign') && subordinates().length));$('r-target').innerHTML='<option value="">-- Tự đăng ký cho bản thân --</option>'+subordinates().map(u=>`<option value="${u.id}">${esc(u.fullName)} (${esc(u.jobTitle||'GV')})</option>`).join('');
+ $('assign-box').classList.toggle('hide',!(can('assign') && subordinates().length));
+ $('r-target').innerHTML='<option value="">-- Tự đăng ký cho bản thân --</option>'+subordinates().map(u=>`<option value="${u.id}">${esc(u.fullName)} (${esc(u.jobTitle||'GV')})</option>`).join('');
 }
 
 function navTo(n){
@@ -361,14 +393,16 @@ function navTo(n){
  if(n==='self'){$('mgr-bar').classList.add('hide');$('mgr-bar').classList.remove('flex');loadView(me.id)}
  if(n==='mgr'){$('mgr-bar').classList.remove('hide');$('mgr-bar').classList.add('flex');const l=subordinates();$('f-user').innerHTML='<option value="">-- Chọn cấp dưới --</option>'+l.map(u=>`<option value="${u.id}">${esc(u.fullName)} (${esc(u.jobTitle||'GV')}) - ${esc(u.dept||'')}</option>`).join('');loadView('')}
  if(n==='reports')renderReports();
- if(n==='admin'){renderDepts();renderUsers();renderPeriods();renderPerms();loadAudit()}
+ if(n==='admin'){renderAxesConfig();renderDepts();renderUsers();renderPeriods();renderPerms();loadAudit()}
 }
 
 /* ================= HỒ SƠ ================= */
 function fillProfile(){
  $('p-name').value=me.fullName||'';
- $('p-dob').value=me.dob\vert{}\vert{}'';$('p-job').value=(me.jobTitle||'')+' - '+(me.dept||'');
- $('p-subject').value=me.subject\vert{}\vert{}'';$('p-duties').value=me.duties||'';
+ $('p-dob').value=me.dob||'';
+ $('p-job').value=(me.jobTitle||'')+' - '+(me.dept||'');
+ $('p-subject').value=me.subject||'';
+ $('p-duties').value=me.duties||'';
 }
 
 async function saveProfile(e){
@@ -380,7 +414,7 @@ async function saveProfile(e){
 /* ================= ĐĂNG KÝ / GIAO VIỆC ================= */
 function fillRegister(){
  $('r-axis').innerHTML=AXES.map((a,i)=>`<option value="${i}">${esc(a.split(' - ')[0])}</option>`).join('');
- $('r-cat').innerHTML='<option value="">-- Chọn từ danh mục mẫu --</option>'+CAT.map((c,i)=>`<option value="${i}">[${AXES[c[0]].split(' - ')[0]}] ${esc(c[1])} (N${c[2]})</option>`).join('');
+ $('r-cat').innerHTML='<option value="">-- Chọn từ danh mục mẫu --</option>'+CAT.map((c,i)=>`<option value="${i}">[${(AXES[c[0]]||'Trục').split(' - ')[0]}] ${esc(c[1])} (N${c[2]})</option>`).join('');
 }
 function fillCat(){const c=CAT[$('r-cat'].value];if(!c)return;$('r-axis').value=c[0];$('r-name').value=c[1];$('r-group').value=c[2]}
 
@@ -487,7 +521,7 @@ async function upd(id,f,el){
  try{await cref('kpi_tasks').doc(id).update({[f]:v})}catch(e){toast('Lỗi lưu!','error')}
 }
 async function addBlank(){if(!perm().edit)return;await cref('kpi_tasks').add(mkTask(viewUid))}
-async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}
+async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}}
 async function saveNote(v){await kset(viewUid,{note:v})}
 
 async function upload(id){
@@ -577,10 +611,59 @@ function downloadExcel(){
  R.rows.forEach((r,i)=>{html+=`<tr><td>${i+1}</td><td>${esc(r.u.fullName)}</td><td>${esc(r.u.jobTitle||'')} - ${esc(r.u.dept||'')}</td><td>${r.d.n||0}</td><td>${f2(r.d.kpi)}</td><td>${r.d.generalScore??cur.config.generalRatio}</td><td><b>${f2(r.d.total)}</b></td><td><b>${esc(r.prop)}</b></td></tr>`});
  html+=`</tbody></table></body></html>`;
  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel'});const url=URL.createObjectURL(blob);
- const a=document.createElement('a');a.href=url;a.download=`PhuLuc_III_${cur.name.replace(/\s+/g,'_')}.xls`;a.click();
+ const a=document.createElement('a');a.href=url;a.download=`PhuLuc_III_${cur.name.replace(/\s+/g, '_')}.xls`;a.click();
 }
 
-/* ================= QUẢN TRỊ & TÀI KHOẢN ================= */
+/* ================= QUẢN TRỊ & THIẾT LẬP HỆ THỐNG ================= */
+function renderAxesConfig(){
+ const box = $('axes-list');
+ if(!box) return;
+ box.innerHTML = AXES.map((ax, i) => `
+  <div class="flex gap-2 items-center bg-slate-50 p-2 rounded-xl border">
+   <b class="text-xs text-sky-800 w-16">Trục ${i+1}:</b>
+   <input type="text" id="axis_input_${i}" value="${esc(ax)}" class="ti font-bold">
+   <button onclick="updateAxis(${i})" class="bg-sky-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"><i class="fas fa-save"></i> Lưu</button>
+   <button onclick="deleteAxis(${i})" class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"><i class="fas fa-trash"></i> Xóa</button>
+  </div>
+ `).join('');
+}
+
+async function updateAxis(i){
+ const val = $('axis_input_'+i).value.trim();
+ if(!val) return toast('Tên trục không được để trống!','warning');
+ AXES[i] = val;
+ await dref('config','axes').set({list: AXES});
+ log('Cập nhật trục KPI', val);
+ toast('Đã cập nhật trục nhiệm vụ!');
+ fillRegister();
+ render();
+}
+
+async function deleteAxis(i){
+ if(AXES.length <= 1) return toast('Phải duy trì ít nhất 1 trục nhiệm vụ!','warning');
+ if(!confirm('Xác nhận xóa trục này?')) return;
+ AXES.splice(i, 1);
+ await dref('config','axes').set({list: AXES});
+ log('Xóa trục KPI', 'Trục '+(i+1));
+ toast('Đã xóa trục nhiệm vụ!');
+ renderAxesConfig();
+ fillRegister();
+ render();
+}
+
+async function addSystemAxis(){
+ const val = $('new-axis-name').value.trim();
+ if(!val) return toast('Vui lòng nhập tên trục mới!','warning');
+ AXES.push(val);
+ await dref('config','axes').set({list: AXES});
+ $('new-axis-name').value = '';
+ log('Thêm trục KPI mới', val);
+ toast('Đã thêm trục nhiệm vụ mới!');
+ renderAxesConfig();
+ fillRegister();
+ render();
+}
+
 function renderDepts(){const l=$('dept-list');if(!l)return;l.innerHTML=depts.map(d=>`<span class="bg-white text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl text-sm font-bold">${esc(d)} <i class="fas fa-times-circle text-red-300 hover:text-red-500 cursor-pointer" onclick="delDept(${JSON.stringify(d).replace(/"/g,'&quot;')})"></i></span>`).join('');
  $('e-dept').innerHTML='<option value="">-- Chọn Tổ --</option>'+depts.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('')}
 async function addDept(){if(me?.role!=='admin')return;const v=$('new-dept').value.trim();if(!v||depts.includes(v))return toast('Tên tổ trống hoặc đã tồn tại!','warning');await dref('config','departments').set({list:[...depts,v]});$('new-dept').value=''}
@@ -631,7 +714,7 @@ async function saveUser(e) {
     const d = {
         fullName: $('e-name').value.trim(), 
         jobTitle: $('e-job').value.trim(), 
-        role: $('e-role'.value), 
+        role: $('e-role').value, 
         dept: $('e-dept').value, 
         managerId: $('e-manager') ?$('e-manager').value : null,
         email: email
