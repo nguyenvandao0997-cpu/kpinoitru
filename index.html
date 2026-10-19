@@ -165,10 +165,10 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
 
 <!-- MODAL 30 ĐIỂM -->
 <div id="m30" class="hide fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/75 p-4">
- <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden">
+ <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden">
   <div class="bg-sky-900 text-white p-4 font-black flex justify-between">TIÊU CHÍ CHUNG (30 ĐIỂM)<button onclick="$('m30').classList.add('hide')">✕</button></div>
-  <div class="p-5 space-y-3 bg-slate-50" id="m30-body"></div>
-  <div class="p-4 flex justify-between items-center border-t"><b>Tổng: <span id="tc-total" class="text-sky-700 text-xl"></span>/30</b><button onclick="save30()" class="px-5 py-2 bg-sky-600 text-white rounded-lg font-bold">LƯU</button></div>
+  <div class="p-5 space-y-3 bg-slate-50 max-h-[65vh] overflow-y-auto" id="m30-body"></div>
+  <div class="p-4 flex justify-between items-center border-t"><div class="text-sm"><b>Điểm: <span id="tc-total" class="text-sky-700 text-xl"></span>/30</b><br><span class="text-red-600">Trừ bổ sung vào tổng điểm: <b id="tc-extra"></b></span></div><button onclick="save30()" class="px-5 py-2 bg-sky-600 text-white rounded-lg font-bold">LƯU</button></div>
  </div>
 </div>
 
@@ -212,6 +212,7 @@ const db=firebase.firestore(),auth=firebase.auth();
 const cref=n=>db.collection([...BASE,n].join('/'));
 const dref=(n,id)=>db.doc([...BASE,n,id].join('/'));
 const kdoc=id=>dref('kpi_docs',id);
+const log=(a,d)=>cref('audit_logs').add({at:Date.now(),by:me.id,byName:me.fullName,target:viewUid||null,action:a,detail:d||''}).catch(()=>{});
 let me=null,users=[],depts=[],viewUid=null,viewUser=null,tasks=[],docInfo=newDoc(),allDocs=[],unsubs=[],mode='self',prev=null;
 function newDoc(){return{status:'DRAFT',tc1:5,tc2:5,tc3:10,tc4:10,generalScore:30,note:''}}
 
@@ -240,7 +241,8 @@ $('login-form').onsubmit=async e=>{
 const isHT=u=>(u.jobTitle||'').toLowerCase().includes('hiệu trưởng')&&!(u.jobTitle||'').toLowerCase().includes('phó');
 function subordinates(){ // cấp dưới của người đăng nhập
  if(me.role==='tt')return users.filter(u=>u.dept===me.dept&&u.role==='gv');
- if(me.role==='bgh')return isHT(me)?users.filter(u=>u.id!==me.id&&u.role!=='admin'):users.filter(u=>u.role==='tt');
+ // BGH chấm/giao việc cho mọi thành viên (Phó HT không chấm Hiệu trưởng và BGH khác); Tổ trưởng: giáo viên/nhân viên trong tổ
+ if(me.role==='bgh')return users.filter(u=>u.id!==me.id&&u.role!=='admin'&&(isHT(me)||(!isHT(u)&&u.role!=='bgh')));
  return[];
 }
 function buildNav(){
@@ -329,8 +331,8 @@ function render(){
    <td class="text-center">${p.edit?`<button onclick="delTask('${t.id}')" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>`:''}</td></tr>`})});
  $('kpi-body').innerHTML=h||'<tr><td colspan="15" class="text-center text-slate-400 py-6 italic">Chưa có nhiệm vụ.</td></tr>';
  $('t-base').textContent=c.base;$('t-kpi').textContent=f2(c.kpi);
- const gen=docInfo.generalScore??30,total=gen+c.kpi,rt=rate(total,c,docInfo.note);
- $('s-gen').textContent=gen+' / 30';$('s-kpi').textContent=f2(c.kpi)+' / 70';$('s-total').textContent=f2(total);$('s-note').value=docInfo.note||'';$('s-note').readOnly=!(p.edit);
+ const gen=docInfo.generalScore??30,ex=docInfo.extraDeduct||0,total=gen+c.kpi-ex,rt=rate(total,c,docInfo.note);
+ $('s-gen').textContent=gen+' / 30'+(ex?' (trừ bổ sung '+ex+')':'');$('s-kpi').textContent=f2(c.kpi)+' / 70';$('s-total').textContent=f2(total);$('s-note').value=docInfo.note||'';$('s-note').readOnly=!(p.edit);
  const cls={X:'bg-sky-100 text-sky-800 border-sky-300',T:'bg-emerald-100 text-emerald-800 border-emerald-300',H:'bg-amber-100 text-amber-800 border-amber-300',K:'bg-red-100 text-red-800 border-red-300'}[rt.k];
  $('s-rating').className='mx-auto my-3 px-6 py-4 rounded-2xl border-2 font-black text-xl text-center '+cls;$('s-rating').textContent=RATE[rt.k];
  const cond=[[c.allDone&&c.n>0,'Hoàn thành 100% nhiệm vụ'],[c.onTime,'Không trễ tiến độ do chủ quan'],[c.over30,`≥30% nhiệm vụ vượt mức (${c.over}/${c.n})`],[!!(docInfo.note||'').trim(),'Có mô tả sản phẩm nổi trội'],[total>=90,'Tổng điểm ≥ 90']];
@@ -345,16 +347,17 @@ function actions(){
  if(p.self)a.innerHTML=s==='DRAFT'?b('PENDING_MANAGER','<i class="fas fa-paper-plane"></i> NỘP PHIẾU CHO CẤP TRÊN DUYỆT','bg-sky-600 text-white'):`<div class="bg-slate-100 p-3 rounded-xl text-center font-bold"><i class="fas fa-lock"></i> Phiếu đã nộp / đã chốt.</div>`;
  else a.innerHTML=s==='PENDING_MANAGER'?b('FINALIZED','<i class="fas fa-stamp"></i> CHỐT ĐIỂM','bg-emerald-600 text-white')+b('DRAFT','<i class="fas fa-undo"></i> Trả lại cấp dưới sửa','bg-amber-100 text-amber-800'):s==='FINALIZED'?b('PENDING_MANAGER','Mở lại để chấm','bg-slate-200 text-slate-700'):`<div class="bg-slate-100 p-3 rounded-xl text-center text-sm">Chờ cấp dưới nộp phiếu.</div>`;
 }
-async function setStatus(st){if(!confirm('Xác nhận đổi trạng thái phiếu?'))return;await kdoc(viewUid).set({status:st},{merge:true});toast('Đã cập nhật!')}
+async function setStatus(st){if(!confirm('Xác nhận đổi trạng thái phiếu?'))return;const o={status:st};if(viewUid!==me.id)Object.assign(o,{reviewedBy:me.id,reviewedByName:me.fullName,reviewedAt:Date.now()});await kdoc(viewUid).set(o,{merge:true});log('Đổi trạng thái phiếu',docInfo.status+' → '+st);toast('Đã cập nhật!')}
 // chỉ ghi khi giá trị thay đổi -> không lặp vô hạn
 let pt;function persist(c,r,total){
- const o={status:docInfo.status,kpi:+f2(c.kpi),total:+f2(total),rating:RATE[r.k],eligible:r.elig,n:c.n,over:c.over,late:c.late,generalScore:docInfo.generalScore??30};
+ const o={status:docInfo.status,kpi:+f2(c.kpi),total:+f2(total),rating:RATE[r.k],eligible:r.elig,n:c.n,over:c.over,late:c.late,generalScore:docInfo.generalScore??30,extraDeduct:docInfo.extraDeduct||0};
  if(!viewUid||docInfo.status==='FINALIZED'||Object.keys(o).every(k=>docInfo[k]===o[k]))return;
  clearTimeout(pt);const id=viewUid;pt=setTimeout(()=>kdoc(id).set(o,{merge:true}).catch(console.error),700);
 }
 async function upd(id,f,el){
  let v=el.type==='checkbox'?el.checked:el.type==='number'?(+el.value||0):el.value;
  if(f==='completion')v=Math.min(100,Math.max(0,v));if(f==='deadline'||f==='doneDate')v=fixDate(v);if(f==='axis')v=+v;
+ const t0=tasks.find(x=>x.id===id);if(t0&&viewUid!==me.id)log('Sửa nhiệm vụ',`${t0.name}: ${f} ${t0[f]??''} → ${v}`);
  try{await cref('kpi_tasks').doc(id).update({[f]:v})}catch(e){toast('Lỗi lưu!','error')}
 }
 async function addBlank(){if(!perm().edit)return;await cref('kpi_tasks').add(mkTask(viewUid))}
@@ -368,11 +371,14 @@ async function upload(id){
   r.readAsDataURL(f)};i.click();
 }
 
-/* ================= TIÊU CHÍ CHUNG 30 ĐIỂM ================= */
-const TC=[['tc1','1. Tư tưởng chính trị',5],['tc2','2. Đạo đức, lối sống',5],['tc3','3. Tác phong, lề lối làm việc',10],['tc4','4. Ý thức tổ chức kỷ luật',10]];
-function open30(){$('m30-body').innerHTML=TC.map(t=>`<div class="bg-white p-3 rounded-xl border flex justify-between items-center"><b class="text-sm">${t[1]}</b><span><input type="number" id="${t[0]}" min="0" max="${t[2]}" value="${docInfo[t[0]]??t[2]}" onchange="calc30()" class="w-16 ti text-center font-bold"> / ${t[2]}</span></div>`).join('');calc30();$('m30').classList.remove('hide')}
-function calc30(){let s=0;TC.forEach(t=>{const e=$(t[0]);e.value=Math.min(t[2],Math.max(0,parseInt(e.value)||0));s+=+e.value});$('tc-total').textContent=s}
-async function save30(){const d={generalScore:+$('tc-total').textContent};TC.forEach(t=>d[t[0]]=+$(t[0]).value);await kdoc(viewUid).set(d,{merge:true});$('m30').classList.add('hide');toast('Đã lưu tiêu chí chung!')}
+/* ================= TIÊU CHÍ CHUNG 30 ĐIỂM (Quy định 255-QĐ/TU) ================= */
+const TC=[['Phẩm chất chính trị, đạo đức, lối sống; chấp hành chủ trương, đường lối của Đảng, chính sách, pháp luật của Nhà nước',8],['Việc thực hiện nội quy, quy chế làm việc, kỷ luật, kỷ cương hành chính; trách nhiệm trong thực hiện nhiệm vụ được giao',8],['Tinh thần phối hợp, giao tiếp, ứng xử với tổ chức, cá nhân, cấp trên, đồng nghiệp; văn hóa công vụ, đạo đức nghề nghiệp',6],['Ý thức học tập, đổi mới phương pháp làm việc, ứng dụng công nghệ thông tin, chuyển đổi số trong thực hiện nhiệm vụ',5],['Thực hiện các nội dung khác trong Quy tắc ứng xử của cán bộ, công chức, viên chức, người lao động và quy định của ngành, lĩnh vực',3]];
+// mỗi lần vi phạm trừ 1 điểm ở tiêu chí; phần vượt quá điểm tối đa của tiêu chí => trừ bổ sung vào tổng điểm
+const tcScore=d=>{let s=0,x=0;TC.forEach((t,i)=>{const v=+d['tcv'+(i+1)]||0;s+=Math.max(0,t[1]-v);x+=Math.max(0,v-t[1])});return{s,x}};
+function open30(){$('m30-body').innerHTML='<p class="text-xs text-slate-500">Nhập số lần vi phạm ở từng tiêu chí (0 = đảm bảo; mỗi lần trừ 01 điểm). Vi phạm vượt quá điểm tối đa của tiêu chí sẽ bị trừ bổ sung vào tổng điểm trước khi phân loại.</p>'+TC.map((t,i)=>`<div class="bg-white p-3 rounded-xl border"><div class="text-sm font-bold mb-2">${i+1}. ${esc(t[0])}</div><div class="flex items-center justify-between text-sm"><span>Số lần vi phạm: <input type="number" min="0" id="tcv${i+1}" value="${docInfo['tcv'+(i+1)]||0}" onchange="calc30()" class="w-16 ti text-center font-bold"></span><span>Điểm: <b id="tcs${i+1}" class="text-sky-700"></b> / ${t[1]} <span id="tcok${i+1}"></span></span></div></div>`).join('');calc30();$('m30').classList.remove('hide')}
+function tcRead(){const d={};TC.forEach((t,i)=>d['tcv'+(i+1)]=Math.max(0,parseInt($('tcv'+(i+1)).value)||0));return d}
+function calc30(){const d=tcRead(),r=tcScore(d);TC.forEach((t,i)=>{const v=d['tcv'+(i+1)];$('tcv'+(i+1)).value=v;$('tcs'+(i+1)).textContent=Math.max(0,t[1]-v);const o=$('tcok'+(i+1));o.textContent=v?'Không đảm bảo':'Đảm bảo';o.className='bd ml-2 '+(v?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700')});$('tc-total').textContent=r.s;$('tc-extra').textContent=r.x}
+async function save30(){const d=tcRead(),r=tcScore(d);Object.assign(d,{generalScore:r.s,extraDeduct:r.x});await kdoc(viewUid).set(d,{merge:true});log('Chấm tiêu chí chung',`${r.s}/30, trừ bổ sung ${r.x}`);$('m30').classList.add('hide');toast('Đã lưu tiêu chí chung!')}
 
 /* ================= PHỤ LỤC III ================= */
 function reportData(){
@@ -392,8 +398,11 @@ function renderReports(){
 /* ================= XUẤT FILE + XEM TRƯỚC ================= */
 const B='border:1px solid #000;padding:4px;',C=B+'text-align:center;';
 const WORD_HEAD=t=>`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><title>${t}</title><style>@page{size:841.9pt 595.3pt;mso-page-orientation:landscape;margin:42pt}body{font-family:'Times New Roman',serif;font-size:11pt}table{border-collapse:collapse}</style></head><body>`;
+function tcTable(d){const th=s=>`<th style="${C}background:#f3f4f6">${s}</th>`;let rs='';
+ TC.forEach((t,i)=>{const v=d['tcv'+(i+1)]||0,ok=v===0;rs+=`<tr><td style="${C}">${i+1}</td><td style="${B}">${esc(t[0])}</td><td style="${C}">${ok?'X':''}</td><td style="${C}">${ok?'':'X'}</td><td style="${C}">${t[1]}</td><td style="${C}">${Math.max(0,t[1]-v)}</td></tr>`});
+ return `<p><b>Chi tiết nhóm tiêu chí chung</b> <i>(ở từng tiêu chí trừ 01 điểm/lần vi phạm; đã trừ hết điểm tiêu chí mà tiếp tục vi phạm thì trừ bổ sung vào tổng điểm trước khi phân loại)</i></p><table style="width:100%"><tr>${['TT','Nội dung/tiêu chí đánh giá','Đảm bảo (đánh dấu X)','Không đảm bảo (đánh dấu X)','Điểm tối đa','Điểm đạt'].map(th).join('')}</tr>${rs}<tr><td colspan="4" style="${B}"><b>Cộng</b></td><td style="${C}">30</td><td style="${C}"><b>${d.generalScore??30}</b></td></tr>${(d.extraDeduct||0)?`<tr><td colspan="5" style="${B}">Trừ bổ sung vào tổng điểm</td><td style="${C}">-${d.extraDeduct}</td></tr>`:''}</table>`}
 function htmlII(u,ts,d){
- const c=calc(ts),gen=d.generalScore??30,total=gen+c.kpi,rt=rate(total,c,d.note),chk=x=>x?'☑':'□';
+ const c=calc(ts),gen=d.generalScore??30,total=gen+c.kpi-(d.extraDeduct||0),rt=rate(total,c,d.note),chk=x=>x?'☑':'□';
  const grp=u.role==='gv'?2:(u.role==='bgh'&&isHT(u)?0:1);
  let body='';
  AXES.forEach((an,ai)=>{const rs=c.rows.filter(r=>+r.t.axis===ai);if(!rs.length)return;const x=c.ax[ai];
@@ -412,11 +421,11 @@ function htmlII(u,ts,d){
  <tr><td style="${B}">Nhóm tiêu chí chung theo biểu mẫu của cơ quan Đảng</td><td style="${C}">30</td><td style="${C}">${gen}</td><td style="${C}"></td></tr>
  <tr><td style="${B}">Kết quả thực hiện nhiệm vụ theo KPI</td><td style="${C}">70</td><td style="${C}">${f2(c.kpi)}</td><td style="${C}"></td></tr>
  <tr><td style="${B}"><b>TỔNG ĐIỂM</b></td><td style="${C}">100</td><td style="${C}"><b>${f2(total)}</b></td><td style="${C}"></td></tr></table>
- <p><b>III. TỰ ĐỀ XUẤT MỨC XẾP LOẠI</b></p>
+ ${tcTable(d)}<p><b>III. TỰ ĐỀ XUẤT MỨC XẾP LOẠI</b></p>
  <table style="width:70%"><tr>${th('Mức xếp loại')}${th('Khung điểm và điều kiện')}${th('Cá nhân tự đề xuất')}</tr>
  ${[['X','Hoàn thành xuất sắc nhiệm vụ','Từ 90 điểm trở lên và đáp ứng đầy đủ điều kiện kèm theo'],['T','Hoàn thành tốt nhiệm vụ','Từ 70 đến dưới 90 điểm và đáp ứng điều kiện của mức xếp loại'],['H','Hoàn thành nhiệm vụ','Từ 50 đến dưới 70 điểm và đáp ứng điều kiện của mức xếp loại'],['K','Không hoàn thành nhiệm vụ','Dưới 50 điểm hoặc thuộc trường hợp phải xếp loại không hoàn thành']].map(x=>`<tr><td style="${B}">${x[1]}</td><td style="${B}">${x[2]}</td><td style="${C}">${chk(rt.k===x[0])}</td></tr>`).join('')}</table>
  <p>Kết quả, sản phẩm nổi trội hoặc vượt mức yêu cầu (nếu đề xuất Hoàn thành xuất sắc nhiệm vụ): ${esc(d.note||'..........................................................................')}</p>
- <table style="width:100%;border:none;text-align:center"><tr><td><b>CÁ NHÂN TỰ ĐÁNH GIÁ</b><br><i>(Ký, ghi rõ họ tên)</i><br><br><br><br>${esc(u.fullName)}</td><td><b>NGƯỜI TRỰC TIẾP NHẬN XÉT, ĐỀ XUẤT</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>XÁC NHẬN CỦA LÃNH ĐẠO PHỤ TRÁCH</b><br><i>(Ký, ghi rõ họ tên)</i></td></tr></table></body></html>`;
+ <table style="width:100%;border:none;text-align:center"><tr><td><b>CÁ NHÂN TỰ ĐÁNH GIÁ</b><br><i>(Ký, ghi rõ họ tên)</i><br><br><br><br>${esc(u.fullName)}</td><td><b>NGƯỜI TRỰC TIẾP NHẬN XÉT, ĐỀ XUẤT</b><br><i>(Ký, ghi rõ họ tên)</i>${d.reviewedByName?'<br><br><br><br>'+esc(d.reviewedByName):''}</td><td><b>XÁC NHẬN CỦA LÃNH ĐẠO PHỤ TRÁCH</b><br><i>(Ký, ghi rõ họ tên)</i></td></tr></table></body></html>`;
 }
 function htmlIII(){
  const R=reportData(),th=s=>`<th style="${C}background:#f3f4f6">${s}</th>`;
