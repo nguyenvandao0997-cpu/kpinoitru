@@ -1,798 +1,456 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cổng Đánh Giá KPI - PTDTNT THCS & THPT Đắk Song</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1e293b">
-    <link rel="icon" type="image/png" href="https://i.postimg.cc/YqTBpm7v/LOGO-NOI-TRU.png">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- SDK Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .table-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px; font-size: 13px; transition: all 0.2s; outline: none; background: #fff; }
-        .table-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-        .table-readonly { background-color: #f1f5f9; font-weight: bold; color: #0f172a; cursor: not-allowed; border-color: transparent; }
-        th { background-color: #1e293b; color: white; padding: 12px 8px; font-size: 12px; font-weight: 600; text-align: center; border: 1px solid #334155; position: sticky; top: 0; z-index: 10; text-transform: uppercase; }
-        td { border: 1px solid #e2e8f0; padding: 8px; vertical-align: middle; }
-        tr:hover td { background-color: #f0f9ff; }
-        .badge { padding: 4px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-        .badge-safe { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-warn { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
-        .badge-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .badge-neutral { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { padding: 12px 20px; border-radius: 8px; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(20px); transition: all 0.3s; display: flex; align-items: center; gap: 10px; font-size: 14px; }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast-success { background-color: #10b981; } .toast-error { background-color: #ef4444; } .toast-warning { background-color: #f59e0b; } .toast-info { background-color: #3b82f6; }
-        .modal-overlay { background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cổng Đánh Giá KPI - PTDTNT THCS & THPT Đắk Song</title>
+<link rel="icon" href="https://i.postimg.cc/YqTBpm7v/LOGO-NOI-TRU.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#334155}
+.ti{width:100%;border:1px solid #cbd5e1;border-radius:6px;padding:6px 8px;font-size:13px;background:#fff;outline:none}
+.ti:focus{border-color:#0284c7;box-shadow:0 0 0 3px rgba(2,132,199,.12)}
+.ro{background:#f1f5f9;color:#0f172a;border-color:transparent}
+th{background:#0f172a;color:#fff;padding:8px 6px;font-size:11px;text-transform:uppercase;border:1px solid #334155;position:sticky;top:0}
+td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
+.ax td{background:#e0f2fe;font-weight:800;color:#0c4a6e}
+.bd{padding:3px 8px;border-radius:99px;font-size:11px;font-weight:700;display:inline-block}
+.nt{padding:11px 16px;font-weight:700;font-size:13px;color:#93c5fd;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer}
+.nt.on{color:#fff;border-color:#38bdf8;background:rgba(2,132,199,.3)}
+#toasts{position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:8px;color:#fff;font-weight:600;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.loader{display:inline-block;width:14px;height:14px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+</style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden relative">
+<body class="h-screen flex flex-col overflow-hidden">
+<div id="toasts"></div>
 
-    <div id="toast-container"></div>
-    
-    <!-- DANH MỤC GỢI Ý (SMART INPUT) -->
-    <datalist id="task-templates">
-        <option value="Dạy học theo Phân phối chương trình">
-        <option value="Công tác Chủ nhiệm lớp">
-        <option value="Quản lý học sinh nội trú ngoài giờ lên lớp">
-        <option value="Bồi dưỡng HSG / Phụ đạo học sinh yếu">
-        <option value="Tham gia sinh hoạt Tổ chuyên môn">
-        <option value="Trực y tế học đường & Kiểm tra ATTP">
-        <option value="Quản lý văn bản đi/đến (Văn thư)">
-        <option value="Thu/chi tiền mặt theo phiếu (Thủ quỹ)">
-        <option value="Lập dự toán thu chi ngân sách (Kế toán)">
-        <option value="Quản lý mượn/trả sách giáo khoa nội trú">
-    </datalist>
+<!-- ĐĂNG NHẬP -->
+<div id="login" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 p-4">
+ <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border-t-8 border-sky-600">
+  <img src="https://i.postimg.cc/YqTBpm7v/LOGO-NOI-TRU.png" class="w-24 h-24 mx-auto rounded-full mb-4" alt="">
+  <h2 class="text-3xl font-black text-center text-slate-800">KPI PORTAL</h2>
+  <p class="text-center text-xs font-bold text-slate-500 mb-4">PTDTNT THCS & THPT Đắk Song</p>
+  <p id="cloud" class="text-center text-sm font-bold text-amber-600 mb-4">Đang kết nối máy chủ...</p>
+  <form id="login-form" class="space-y-4">
+   <input id="username" required class="ti" placeholder="Tên đăng nhập">
+   <input id="password" type="password" required class="ti" placeholder="Mật khẩu">
+   <button id="btn-login" disabled class="w-full bg-slate-300 text-white font-black py-3 rounded-xl">ĐĂNG NHẬP</button>
+  </form>
+ </div>
+</div>
 
-    <!-- MÀN HÌNH ĐĂNG NHẬP -->
-    <div id="login-screen" class="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900 p-4 transition-opacity duration-500 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col p-8 border-t-8 border-blue-600 relative">
-            <div class="flex justify-center mb-6">
-                <div class="w-24 h-24 relative flex items-center justify-center bg-white rounded-full border-4 border-slate-100 shadow-md p-1">
-                    <img src="https://i.postimg.cc/YqTBpm7v/LOGO-NOI-TRU.png" alt="Logo" class="w-full h-full object-contain rounded-full">
-                </div>
-            </div>
-            <h2 class="text-3xl font-black text-center text-slate-800 mb-1">KPI PORTAL</h2>
-            <div class="text-center mb-6"><span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-md border border-slate-200">PTDTNT THCS & THPT Đắk Song</span></div>
-            
-            <!-- Trạng thái Đám mây -->
-            <div id="cloud-status" class="text-center mb-6 text-sm font-bold text-amber-600">
-                <i class="fas fa-sync fa-spin"></i> Đang kết nối máy chủ Đám mây...
-            </div>
-            
-            <form id="login-form" class="space-y-5">
-                <div><label class="block text-xs font-bold text-slate-500 mb-1.5">Tên đăng nhập</label><input type="text" id="username" required class="table-input" placeholder="Nhập tài khoản..."></div>
-                <div><label class="block text-xs font-bold text-slate-500 mb-1.5">Mật khẩu</label><input type="password" id="password" required class="table-input" placeholder="••••••••"></div>
-                <button type="submit" id="btn-login" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3.5 px-4 rounded-xl cursor-not-allowed transition-all">ĐĂNG NHẬP</button>
-            </form>
-        </div>
+<div id="app" class="hide flex flex-col h-full">
+ <header class="bg-sky-900 text-white shadow-lg flex-shrink-0">
+  <div class="px-4 py-3 flex justify-between items-center border-b border-sky-800">
+   <div><h1 class="text-lg font-black text-sky-200">KPI PORTAL <span class="text-white text-sm">| Đắk Song</span></h1><p class="text-[11px] text-sky-300 uppercase font-semibold">Đánh giá Quý III/2026 - Công văn Sở GDĐT Lâm Đồng</p></div>
+   <div class="flex items-center gap-3"><div class="text-right hidden sm:block"><p class="text-sm font-bold" id="u-name"></p><p class="text-xs text-emerald-300" id="u-role"></p></div>
+   <button onclick="location.reload()" class="w-10 h-10 bg-sky-800 hover:bg-red-600 rounded-lg"><i class="fas fa-power-off"></i></button></div>
+  </div>
+  <nav class="flex overflow-x-auto bg-sky-950/60" id="nav"></nav>
+ </header>
+
+ <main class="flex-grow overflow-y-auto p-4 sm:p-6 pb-24">
+  <!-- HỒ SƠ -->
+  <section id="v-profile" class="max-w-3xl mx-auto hide">
+   <form onsubmit="saveProfile(event)" class="bg-white rounded-2xl border border-slate-200 p-6 border-t-8 border-sky-600 space-y-4">
+    <h2 class="text-xl font-black"><i class="fas fa-id-badge text-sky-600"></i> Hồ sơ cá nhân</h2>
+    <div class="grid sm:grid-cols-2 gap-4">
+     <label class="text-sm font-bold">Họ và tên<input id="p-name" required class="ti mt-1"></label>
+     <label class="text-sm font-bold">Ngày sinh<input id="p-dob" type="date" class="ti mt-1"></label>
+     <label class="text-sm font-bold">Chức vụ / Tổ<input id="p-job" readonly class="ti ro mt-1"></label>
+     <label class="text-sm font-bold">Môn giảng dạy<input id="p-subject" class="ti mt-1"></label>
     </div>
+    <label class="text-sm font-bold block">Nhiệm vụ kiêm nhiệm<textarea id="p-duties" rows="2" class="ti mt-1"></textarea></label>
+    <label class="text-sm font-bold block">Đổi mật khẩu (để trống nếu không đổi)<input id="p-pass" type="password" autocomplete="new-password" class="ti mt-1"></label>
+    <div class="text-right"><button class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-6 rounded-xl"><i class="fas fa-save"></i> LƯU</button></div>
+   </form>
+  </section>
 
-    <!-- MÀN HÌNH CHÍNH -->
-    <div id="app-wrapper" class="flex flex-col h-full w-full opacity-0 hidden transition-opacity duration-500">
-        <!-- HEADER -->
-        <header class="bg-slate-900 text-white shadow-lg z-20 flex-shrink-0 border-b-4 border-blue-600">
-            <div class="max-w-[1600px] mx-auto px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="bg-white p-1 rounded-full"><img src="https://i.postimg.cc/YqTBpm7v/LOGO-NOI-TRU.png" class="w-10 h-10 object-contain rounded-full"></div>
-                    <div><h1 class="text-xl font-black text-blue-400">KPI PORTAL <span class="text-white text-sm">| Đắk Song</span></h1><p class="text-[11px] text-slate-400 uppercase font-semibold">Hệ thống Đánh giá Hiệu suất</p></div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button id="nav-admin" onclick="switchView('admin')" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-bold border border-slate-700"><i class="fas fa-users-cog mr-1"></i> Quản lý User</button>
-                    <button id="nav-dashboard" onclick="switchView('dashboard')" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-bold border border-slate-700"><i class="fas fa-home mr-1"></i> Trang chủ KPI</button>
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-white" id="user-display-name">...</p>
-                        <p class="text-xs text-emerald-400 font-semibold" id="user-role-name">...</p>
-                    </div>
-                    <button onclick="handleLogout()" class="w-10 h-10 bg-slate-800 hover:bg-red-500 text-slate-300 hover:text-white rounded-lg font-bold"><i class="fas fa-power-off"></i></button>
-                </div>
-            </div>
-        </header>
-
-        <!-- MAIN WORKSPACE -->
-        <main class="flex-grow overflow-y-auto no-scrollbar p-4 sm:p-6 pb-24 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" id="main-content">
-            
-            <!-- VIEW DASHBOARD (ĐÁNH GIÁ KPI) -->
-            <div id="view-dashboard" class="max-w-[1600px] mx-auto space-y-6">
-                <!-- BỘ LỌC QUẢN LÝ -->
-                <div id="manager-filter-bar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center gap-4">
-                    <span class="font-bold text-slate-700"><i class="fas fa-filter text-blue-500 mr-1"></i> Xem hồ sơ của:</span>
-                    <select id="filter-user" onchange="loadTasksForSelectedUser()" class="p-2.5 border border-slate-300 rounded-lg text-sm font-bold text-blue-800 outline-none min-w-[250px]"><option value="">-- Chọn Giáo viên / Nhân viên --</option></select>
-                    <span id="doc-status-badge" class="badge badge-neutral ml-auto text-sm py-1.5 px-3">...</span>
-                </div>
-
-                <!-- BẢNG KPI 70 ĐIỂM -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                    <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                        <h3 class="font-black text-slate-800 text-lg"><i class="fas fa-list-check text-blue-600"></i> I. NHIỆM VỤ KPI (70 ĐIỂM)</h3>
-                        <button id="btn-add-task" onclick="addTaskRow()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold"><i class="fas fa-plus mr-1"></i> Thêm việc</button>
-                    </div>
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-sm border-collapse min-w-[1400px]">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2" class="w-10">TT</th>
-                                    <th rowspan="2" class="w-64 text-left">Nội dung nhiệm vụ</th>
-                                    <th rowspan="2" class="w-32">Nhóm Độ Khó</th>
-                                    <th rowspan="2" class="w-20 bg-slate-800 text-amber-400">Điểm<br>Chuẩn</th>
-                                    <th colspan="3" class="bg-blue-900 text-blue-100 border-x border-slate-700">TIẾN ĐỘ & MINH CHỨNG</th>
-                                    <th colspan="2" class="bg-emerald-900 text-emerald-100 border-r border-slate-700">DUYỆT LỖI</th>
-                                    <th rowspan="2" class="w-24 bg-slate-800 text-white">Điểm<br>Thực Tế</th>
-                                    <th rowspan="2" class="w-24 bg-slate-900 text-emerald-400">KPI<br>Quy Đổi</th>
-                                    <th rowspan="2" class="w-10"><i class="fas fa-cog"></i></th>
-                                </tr>
-                                <tr>
-                                    <th class="w-32 bg-blue-800 border-l border-slate-700">Deadline</th>
-                                    <th class="w-32 bg-blue-800">Trạng thái (Auto)</th>
-                                    <th class="w-24 bg-blue-800 border-r border-slate-700">Minh chứng</th>
-                                    <th class="w-24 bg-emerald-800">Ngày trễ (Trừ T7, CN)</th>
-                                    <th class="w-24 bg-emerald-800 border-r border-slate-700">Số lần sửa</th>
-                                </tr>
-                            </thead>
-                            <tbody id="kpi-tbody" class="bg-white"></tbody>
-                            <tfoot class="bg-slate-100 font-bold border-t-2 border-slate-300">
-                                <tr>
-                                    <td colspan="3" class="text-right py-4 text-slate-600">TỔNG ĐIỂM CHUẨN:</td><td class="text-center text-slate-800 text-lg" id="total-base-score">0</td>
-                                    <td colspan="6" class="text-right text-xs text-slate-500 italic pr-4">Tổng điểm KPI quy đổi (Tối đa 70đ):</td>
-                                    <td class="text-center text-emerald-600 text-2xl font-black bg-emerald-50" id="total-kpi-score">0.00</td><td></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- TỔNG HỢP VÀ ACTION -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col">
-                        <div class="p-4 border-b border-slate-200 bg-slate-50"><h3 class="font-black text-slate-800 text-lg"><i class="fas fa-calculator text-blue-600"></i> II. TỔNG ĐIỂM ĐÁNH GIÁ</h3></div>
-                        <div class="p-6 space-y-5 flex-grow">
-                            <!-- BẢNG KIỂM 30 ĐIỂM THÔNG MINH -->
-                            <div class="flex flex-col p-4 border border-blue-200 rounded-xl bg-blue-50/30 gap-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-slate-800">1. Nhóm Tiêu chí chung (Chuẩn Tỉnh ủy)</span>
-                                    <div class="flex items-center gap-2">
-                                        <input type="text" id="general-score" readonly class="w-20 p-2 border border-blue-300 rounded-lg text-center font-black text-blue-700 bg-white shadow-inner" value="30">
-                                        <span class="text-sm font-bold text-slate-400">/ 30</span>
-                                    </div>
-                                </div>
-                                <button id="btn-open-30pts" onclick="open30PtsModal()" class="w-full bg-white border border-blue-300 hover:bg-blue-50 text-blue-700 py-2 rounded-lg text-sm font-bold transition shadow-sm"><i class="fas fa-tasks"></i> Đánh giá Bảng Tiêu chí chung (4 Mức)</button>
-                            </div>
-                            
-                            <div class="flex justify-between items-center p-4 border border-slate-200 rounded-xl bg-slate-50">
-                                <span class="font-bold text-slate-800">2. Kết quả thực hiện nhiệm vụ (KPI Quy đổi)</span>
-                                <div class="flex items-center gap-2">
-                                    <input type="text" id="final-kpi-display" readonly class="w-20 p-2 border border-transparent rounded-lg text-center font-black text-emerald-600 bg-emerald-50" value="0.00">
-                                    <span class="text-sm font-bold text-slate-400">/ 70</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-5 border-2 border-blue-200 rounded-2xl bg-blue-50 mt-4">
-                                <span class="font-black text-blue-900 text-lg tracking-widest">TỔNG ĐIỂM</span>
-                                <span id="final-total-score" class="text-4xl font-black text-blue-700 drop-shadow-sm">0.00</span>
-                            </div>
-                        </div>
-                        <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between">
-                            <button id="btn-export-phuluc3" onclick="exportPhuLuc3Excel()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold shadow transition items-center gap-2">
-                                <i class="fas fa-table"></i> Xuất Phụ lục III
-                            </button>
-                            <button onclick="exportWordReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold shadow transition ml-auto flex items-center gap-2">
-                                <i class="fas fa-file-word"></i> Xuất Phiếu In (PL II)
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col p-8 relative">
-                        <div class="flex-grow flex flex-col justify-center items-center text-center space-y-4 mb-6">
-                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1" id="rating-label">Mức xếp loại tự động</p>
-                            <div id="rating-badge" class="px-8 py-5 rounded-3xl border-2 font-black text-2xl uppercase tracking-wider">ĐANG TÍNH TOÁN...</div>
-                            <p id="rating-condition" class="text-xs text-slate-500 font-medium px-4 mt-2 max-w-sm"></p>
-                        </div>
-                        <div id="action-container" class="w-full flex flex-col gap-4 border-t border-slate-100 pt-6"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW QUẢN TRỊ ADMIN -->
-            <div id="view-admin" class="hidden max-w-[1600px] mx-auto space-y-8">
-                <!-- TẠO TỔ CHUYÊN MÔN -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8 border-t-8 border-emerald-600">
-                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-4"><i class="fas fa-sitemap text-emerald-600"></i> QUẢN LÝ TỔ / BỘ PHẬN</h2>
-                    <p class="text-sm text-slate-500 font-semibold mb-6">Thêm các Tổ/Phòng ban trong nhà trường để gán cho Giáo viên khi tạo tài khoản.</p>
-                    <div class="flex flex-col sm:flex-row gap-3 mb-6">
-                        <input type="text" id="new-dept-name" class="table-input font-bold bg-slate-50 focus:bg-white text-base" placeholder="Nhập tên Tổ mới...">
-                        <button onclick="addDepartment()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg font-bold shadow-md transition whitespace-nowrap"><i class="fas fa-plus mr-2"></i> Thêm Tổ</button>
-                    </div>
-                    <div class="flex flex-wrap gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl min-h-[80px]" id="dept-list-container"></div>
-                </div>
-
-                <!-- QUẢN LÝ TÀI KHOẢN -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8 border-t-8 border-blue-800">
-                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-6"><i class="fas fa-users-cog text-blue-600"></i> TẠO & QUẢN LÝ TÀI KHOẢN</h2>
-                    <form id="user-form" onsubmit="saveUser(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 bg-slate-50 p-6 rounded-xl border border-slate-200 mb-8">
-                        <input type="hidden" id="edit-user-id" value="">
-                        <div class="md:col-span-2 lg:col-span-2"><label class="block text-sm font-bold text-slate-700 mb-2">Họ và tên người dùng <span class="text-red-500">*</span></label><input type="text" id="user-fullname" required class="table-input font-bold" placeholder="VD: Nguyễn Văn Đạo"></div>
-                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Chức vụ <span class="text-red-500">*</span></label><input type="text" id="user-job-title" required class="table-input font-bold text-blue-700 bg-blue-50" placeholder="VD: Phó Hiệu trưởng..."></div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Vai trò Hệ thống <span class="text-red-500">*</span></label>
-                            <select id="user-role" required class="table-input font-bold text-slate-700"><option value="gv">Giáo viên / Nhân viên</option><option value="tt">Tổ trưởng</option><option value="bgh">Ban Giám Hiệu</option><option value="admin">Quản trị viên</option></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Trực thuộc Tổ <span class="text-red-500">*</span></label>
-                            <select id="user-dept" required class="table-input font-bold text-emerald-800 bg-emerald-50"><option value="">-- Tạo Tổ trước --</option></select>
-                        </div>
-                        <div class="hidden lg:block"></div>
-                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Tên đăng nhập <span class="text-red-500">*</span></label><input type="text" id="user-username" required class="table-input font-mono text-slate-700" placeholder="Viết liền không dấu..."></div>
-                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Mật khẩu <span class="text-red-500">*</span></label><input type="text" id="user-password" required class="table-input font-mono text-slate-700" value="123456"></div>
-                        <div><label class="block text-sm font-bold text-slate-700 mb-2">Email (Thông báo Deadline)</label><input type="email" id="user-email" class="table-input text-blue-700" placeholder="example@gmail.com"></div>
-                        <div class="md:col-span-2 lg:col-span-3 flex justify-end gap-3 mt-4 border-t border-slate-200 pt-5">
-                            <button type="button" onclick="resetUserForm()" class="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">Hủy</button>
-                            <button type="submit" class="px-8 py-2.5 bg-blue-800 text-white font-bold rounded-lg shadow-md hover:bg-blue-900 transition flex items-center gap-2"><i class="fas fa-save"></i> LƯU TÀI KHOẢN</button>
-                        </div>
-                    </form>
-                    <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-sm">
-                        <table class="w-full text-sm text-left"><thead class="bg-slate-100 text-slate-600 uppercase text-xs tracking-wider"><tr><th class="p-4">Họ và tên</th><th class="p-4">Tài khoản (Pass)</th><th class="p-4">Vai trò / Tổ</th><th class="p-4">Email</th><th class="p-4 text-center">Thao tác</th></tr></thead><tbody id="users-table-body" class="divide-y divide-slate-100 bg-white"></tbody></table>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+  <!-- ĐĂNG KÝ / GIAO VIỆC -->
+  <section id="v-register" class="max-w-4xl mx-auto hide">
+   <form onsubmit="addTask(event)" class="bg-white rounded-2xl border border-slate-200 p-6 border-t-8 border-sky-700 space-y-4">
+    <h2 class="text-xl font-black"><i class="fas fa-sitemap text-sky-700"></i> Đăng ký nhiệm vụ theo 6 trục & giao việc</h2>
+    <p class="text-sm text-slate-500">Nhiệm vụ thêm vào sẽ vào thẳng Phụ lục II của người nhận. Mỗi sản phẩm chỉ chấm một dòng, một trục chính (không chấm trùng).</p>
+    <select id="r-cat" class="ti" onchange="fillCat()"></select>
+    <div class="grid sm:grid-cols-4 gap-3">
+     <select id="r-axis" class="ti font-bold"></select>
+     <input id="r-name" required class="ti sm:col-span-2" placeholder="Nội dung nhiệm vụ">
+     <select id="r-group" class="ti font-bold"><option value="1">Nhóm 1 (100đ)</option><option value="2">Nhóm 2 (150đ)</option><option value="3">Nhóm 3 (200đ)</option><option value="4">Nhóm 4 (250đ)</option></select>
+     <input id="r-product" class="ti sm:col-span-2" placeholder="Sản phẩm cụ thể (VD: Kế hoạch số...)">
+     <input id="r-qty" class="ti" placeholder="Số lượng (VD: 1, thường xuyên)">
+     <input id="r-deadline" type="date" class="ti" title="Thời hạn">
     </div>
+    <div id="assign-box" class="hide"><label class="text-xs font-bold text-sky-900">Giao cho cấp dưới (để trống = tự đăng ký)</label><select id="r-target" class="ti"></select></div>
+    <div class="text-right"><button class="bg-sky-700 hover:bg-sky-800 text-white font-bold py-2.5 px-6 rounded-xl"><i class="fas fa-plus-circle"></i> Đăng ký / Giao việc</button></div>
+   </form>
+  </section>
 
-    <!-- MODAL 30 ĐIỂM TIÊU CHÍ CHUNG -->
-    <div id="modal-30pts" class="hidden fixed inset-0 z-[200] flex items-center justify-center modal-overlay p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
-            <div class="bg-blue-900 p-4 text-white flex justify-between items-center"><h3 class="font-black text-lg"><i class="fas fa-clipboard-check mr-2"></i> BẢNG ĐÁNH GIÁ TIÊU CHÍ CHUNG</h3><button onclick="close30PtsModal()" class="hover:text-red-300"><i class="fas fa-times text-xl"></i></button></div>
-            <div class="p-6 space-y-4 bg-slate-50">
-                <p class="text-xs font-bold text-slate-500 mb-2 text-center">Căn cứ Quy định 255-QĐ/TU của Tỉnh ủy.</p>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">1. Tư tưởng chính trị</div><div class="text-[10px] text-slate-400">Chấp hành chủ trương...</div></div><div class="flex items-center gap-2"><input type="number" id="tc1" min="0" max="5" value="5" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 5đ</span></div></div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">2. Đạo đức, lối sống</div><div class="text-[10px] text-slate-400">Đoàn kết nội bộ...</div></div><div class="flex items-center gap-2"><input type="number" id="tc2" min="0" max="5" value="5" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 5đ</span></div></div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">3. Tác phong, lề lối làm việc</div><div class="text-[10px] text-slate-400">Trách nhiệm, phối hợp tốt...</div></div><div class="flex items-center gap-2"><input type="number" id="tc3" min="0" max="10" value="10" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 10đ</span></div></div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div><div class="font-bold text-slate-800 text-sm">4. Ý thức tổ chức kỷ luật</div><div class="text-[10px] text-slate-400">Giờ giấc, nội quy...</div></div><div class="flex items-center gap-2"><input type="number" id="tc4" min="0" max="10" value="10" class="w-16 p-2 border border-slate-300 rounded text-center font-bold text-blue-700" onchange="calc30Pts()"><span class="text-xs font-bold text-slate-400">/ 10đ</span></div></div>
-                <div class="flex justify-between items-center p-4 bg-blue-100 rounded-xl border border-blue-300"><span class="font-black text-blue-900 uppercase">TỔNG ĐIỂM CƠ BẢN</span><span id="tc-total" class="font-black text-2xl text-blue-700">30</span></div>
-            </div>
-            <div class="p-4 border-t border-slate-200 flex justify-end gap-3 bg-white"><button onclick="close30PtsModal()" class="px-5 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">Hủy</button><button id="btn-save-30pts" onclick="save30PtsToDB()" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow">LƯU ĐIỂM TIÊU CHÍ</button></div>
-        </div>
+  <!-- PHỤ LỤC II -->
+  <section id="v-kpi" class="max-w-[1600px] mx-auto space-y-5 hide">
+   <div id="mgr-bar" class="hide bg-white rounded-2xl border border-slate-200 p-4 flex-wrap items-center gap-3">
+    <b><i class="fas fa-filter text-sky-600"></i> Chấm điểm cho:</b><select id="f-user" onchange="loadView(this.value)" class="ti max-w-xs font-bold"></select>
+   </div>
+   <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div class="p-4 bg-slate-50 border-b flex justify-between items-center flex-wrap gap-2">
+     <div><h3 class="font-black text-lg">I. KẾT QUẢ THỰC HIỆN NHIỆM VỤ THEO KPI (70 ĐIỂM)</h3><p class="text-xs text-slate-500">A = chuẩn × %HT; B = chuẩn × (100% − 5% × lần sửa); C = chuẩn × (100% − 5% × ngày làm việc trễ); điểm = (A+B+C)/3. Tính đến hết 30/9/2026.</p></div>
+     <div class="flex gap-2"><span id="st-badge"></span><button id="btn-add" onclick="addBlank()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold"><i class="fas fa-plus"></i> Thêm việc</button></div>
     </div>
+    <div class="overflow-x-auto"><table class="w-full text-sm border-collapse min-w-[1450px]">
+     <thead><tr><th>TT</th><th class="w-72">Nhiệm vụ / Trục</th><th>Nhóm</th><th>Điểm chuẩn</th><th>Sản phẩm / SL</th><th>Thời hạn</th><th>Ngày HT</th><th>% HT (A)</th><th>Lần sửa (B)</th><th>Vượt mức</th><th>Khách quan</th><th>Trễ (ngày LV)</th><th>Điểm thực tế</th><th>KPI quy đổi</th><th></th></tr></thead>
+     <tbody id="kpi-body"></tbody>
+     <tfoot><tr class="bg-slate-100 font-bold"><td colspan="3" class="text-right">TỔNG ĐIỂM CHUẨN:</td><td id="t-base" class="text-center"></td><td colspan="9" class="text-right">TỔNG ĐIỂM KPI (tối đa 70):</td><td id="t-kpi" class="text-center text-xl text-emerald-600"></td><td></td></tr></tfoot>
+    </table></div>
+   </div>
+   <div class="grid lg:grid-cols-2 gap-5">
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+     <h3 class="font-black text-lg"><i class="fas fa-calculator text-sky-600"></i> II. TỔNG HỢP KẾT QUẢ</h3>
+     <div class="flex justify-between items-center p-3 border rounded-xl"><span class="font-bold">1. Tiêu chí chung (Quy định 255-QĐ/TU)</span><b id="s-gen" class="text-sky-700 text-xl"></b></div>
+     <button id="btn-30" onclick="open30()" class="w-full border border-sky-300 text-sky-700 py-2 rounded-lg font-bold hover:bg-sky-50"><i class="fas fa-tasks"></i> Chấm tiêu chí chung (30đ)</button>
+     <div class="flex justify-between items-center p-3 border rounded-xl"><span class="font-bold">2. Kết quả KPI</span><b id="s-kpi" class="text-emerald-600 text-xl"></b></div>
+     <div class="flex justify-between items-center p-4 border-2 border-sky-200 bg-sky-50 rounded-2xl"><b class="text-sky-900">TỔNG ĐIỂM QUÝ III</b><b id="s-total" class="text-4xl text-sky-700"></b></div>
+     <label class="text-sm font-bold block">Kết quả, sản phẩm nổi trội / vượt mức (bắt buộc nếu đề xuất HTXS)<textarea id="s-note" rows="3" class="ti mt-1" onchange="saveNote(this.value)"></textarea></label>
+     <div class="grid grid-cols-2 gap-2"><button onclick="preview('II')" class="bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-xl font-bold"><i class="fas fa-eye"></i> XEM TRƯỚC PHỤ LỤC II</button>
+     <button onclick="preview('II',true)" class="bg-slate-700 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold"><i class="fas fa-file-word"></i> TẢI VỀ (.doc)</button></div>
+    </div>
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col">
+     <p class="text-[11px] font-bold text-slate-400 uppercase text-center">Mức xếp loại tự đề xuất</p>
+     <div id="s-rating" class="mx-auto my-3 px-6 py-4 rounded-2xl border-2 font-black text-xl text-center"></div>
+     <ul id="s-cond" class="text-xs space-y-1 mb-4"></ul>
+     <div id="actions" class="mt-auto space-y-2 border-t pt-4"></div>
+    </div>
+   </div>
+  </section>
 
-    <!-- SCRIPT TỔNG HỢP (ĐÃ THÊM TÍNH NĂNG BẮT LỖI) -->
-    <script type="text/javascript">
-        // 1. FIREBASE CONFIG THẬT CỦA TRƯỜNG ĐẮK SONG
-        const firebaseConfig = { 
-            apiKey: "AIzaSyBQ674rvyTsjbPBNMXscVE1LFY3uo1Neaw", 
-            authDomain: "class-rank-noi-tru-dak-song.firebaseapp.com", 
-            projectId: "class-rank-noi-tru-dak-song", 
-            storageBucket: "class-rank-noi-tru-dak-song.firebasestorage.app", 
-            messagingSenderId: "1087793103334", 
-            appId: "1:1087793103334:web:0c813d1d241f03529d1627",
-            measurementId: "G-HZ6Z7TF729"
-        };
-        const basePath = ['artifacts', 'kpi-app-daksong', 'public', 'data'];
+  <!-- PHỤ LỤC III -->
+  <section id="v-reports" class="max-w-[1600px] mx-auto space-y-5 hide">
+   <div class="bg-white rounded-2xl border border-slate-200 p-6 border-t-8 border-emerald-600 flex flex-wrap justify-between items-center gap-3">
+    <div><h2 class="text-xl font-black"><i class="fas fa-chart-line text-emerald-600"></i> PHỤ LỤC III: TỔNG HỢP & KIỂM SOÁT TỶ LỆ HTXS (≤ 20% số người HTT, làm tròn từ 0,5)</h2><p id="quota-line" class="text-sm text-slate-500 font-semibold"></p></div>
+    <div class="flex gap-2"><button onclick="preview('III')" class="bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl"><i class="fas fa-eye"></i> Xem trước</button><button onclick="preview('III',true)" class="bg-slate-700 text-white font-bold py-2.5 px-5 rounded-xl"><i class="fas fa-file-excel"></i> Tải về (.xls)</button></div>
+   </div>
+   <div class="bg-white rounded-2xl border overflow-x-auto"><table class="w-full text-sm min-w-[1000px]"><thead><tr><th>TT</th><th>Họ tên</th><th>Chức vụ / Tổ</th><th>Phiếu</th><th>Số NV</th><th>KPI /70</th><th>TC /30</th><th>Tổng /100</th><th>NV vượt</th><th>NV chậm</th><th>Cá nhân đề xuất</th><th>Đơn vị đề xuất</th></tr></thead><tbody id="rep-body"></tbody></table></div>
+  </section>
 
-        // 2. GAS URL CHO CHỨC NĂNG MINH CHỨNG DRIVE
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwXSEJWFSfcpNhYFvLqd5AoTTKdpLKT9ulE_sPh5oyHq7CalRbxbYo2q2zyazwDuQU69w/exec";
+  <!-- QUẢN TRỊ -->
+  <section id="v-admin" class="max-w-6xl mx-auto space-y-6 hide">
+   <div class="bg-white rounded-2xl p-6 border-t-8 border-emerald-600 shadow-sm">
+    <h2 class="font-black text-lg mb-3"><i class="fas fa-sitemap text-emerald-600"></i> QUẢN LÝ TỔ / BỘ PHẬN</h2>
+    <div class="flex gap-2 mb-3"><input id="new-dept" class="ti" placeholder="Tên tổ mới"><button onclick="addDept()" class="bg-emerald-600 text-white px-5 rounded-lg font-bold whitespace-nowrap">Thêm tổ</button></div>
+    <div id="dept-list" class="flex flex-wrap gap-2"></div>
+   </div>
+   <div class="bg-white rounded-2xl p-6 border-t-8 border-sky-800 shadow-sm">
+    <h2 class="font-black text-lg mb-3"><i class="fas fa-users-cog text-sky-600"></i> TÀI KHOẢN</h2>
+    <form id="user-form" onsubmit="saveUser(event)" class="grid md:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl mb-4">
+     <input type="hidden" id="e-id">
+     <input id="e-name" required class="ti md:col-span-2" placeholder="Họ và tên">
+     <input id="e-job" required class="ti" placeholder="Chức vụ (VD: Giáo viên, Phó Hiệu trưởng)">
+     <select id="e-role" class="ti"><option value="gv">Giáo viên / Nhân viên</option><option value="tt">Tổ trưởng</option><option value="bgh">Ban Giám Hiệu</option><option value="admin">Quản trị viên</option></select>
+     <select id="e-dept" class="ti"></select>
+     <input id="e-user" required class="ti" placeholder="Tên đăng nhập">
+     <input id="e-pass" type="password" autocomplete="new-password" class="ti" placeholder="Mật khẩu (để trống = giữ nguyên)">
+     <div class="md:col-span-2 text-right"><button type="button" onclick="document.getElementById('user-form').reset();$('e-id').value=''" class="px-4 py-2 bg-slate-200 rounded-lg font-bold">Hủy</button> <button class="px-6 py-2 bg-sky-800 text-white rounded-lg font-bold">LƯU</button></div>
+    </form>
+    <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr><th>Họ tên</th><th>Tài khoản</th><th>Vai trò / Tổ</th><th></th></tr></thead><tbody id="user-body"></tbody></table></div>
+   </div>
+  </section>
+ </main>
+</div>
 
-        let app, db, auth;
-        try { 
-            app = firebase.initializeApp(firebaseConfig); 
-            db = firebase.firestore(); 
-            auth = firebase.auth(); 
-        } catch(e) {
-            console.error("Lỗi khởi tạo Firebase:", e);
-        }
-        
-        const signInAnonymously = (a) => a.signInAnonymously();
-        const doc = (d, ...paths) => paths.length > 0 ? d.doc(paths.join('/')) : d.doc();
-        const collection = (d, ...paths) => d.collection(paths.join('/'));
-        const setDoc = (ref, data, opts) => ref.set(data, opts);
-        const addDoc = (ref, data) => ref.add(data);
-        const updateDoc = (ref, data) => ref.update(data);
-        const deleteDoc = (ref) => ref.delete();
-        const onSnapshot = (ref, cb) => ref.onSnapshot(cb);
+<!-- MODAL 30 ĐIỂM -->
+<div id="m30" class="hide fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/75 p-4">
+ <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden">
+  <div class="bg-sky-900 text-white p-4 font-black flex justify-between">TIÊU CHÍ CHUNG (30 ĐIỂM)<button onclick="$('m30').classList.add('hide')">✕</button></div>
+  <div class="p-5 space-y-3 bg-slate-50" id="m30-body"></div>
+  <div class="p-4 flex justify-between items-center border-t"><b>Tổng: <span id="tc-total" class="text-sky-700 text-xl"></span>/30</b><button onclick="save30()" class="px-5 py-2 bg-sky-600 text-white rounded-lg font-bold">LƯU</button></div>
+ </div>
+</div>
 
-        let currentUser = null; let allUsers = []; let departments = [];
-        let viewingUserId = null; let viewingUserObj = null; let tasks = []; 
-        let viewingDocInfo = { status: 'DRAFT', tc1: 5, tc2: 5, tc3: 10, tc4: 10, generalScore: 30 }; 
+<!-- MODAL XEM TRƯỚC -->
+<div id="mprev" class="hide fixed inset-0 z-[300] flex flex-col bg-slate-900/80 p-3">
+ <div class="bg-white rounded-t-xl p-3 flex flex-wrap justify-between items-center gap-2">
+  <b id="prev-title"></b>
+  <div class="flex gap-2"><button onclick="printPrev()" class="px-4 py-2 bg-slate-200 rounded-lg font-bold"><i class="fas fa-print"></i> In / PDF</button><button onclick="downloadPrev()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold"><i class="fas fa-download"></i> Tải về</button><button onclick="$('mprev').classList.add('hide')" class="px-4 py-2 bg-red-500 text-white rounded-lg font-bold">Đóng</button></div>
+ </div>
+ <iframe id="prev-frame" class="flex-grow bg-white rounded-b-xl w-full"></iframe>
+</div>
 
-        const GROUP_SCORES = { "1": 100, "2": 150, "3": 200, "4": 250 };
-        const STATUS_NAMES = { 'DRAFT': '<span class="badge badge-neutral"><i class="fas fa-edit"></i> Đang soạn thảo</span>', 'PENDING_TT': '<span class="badge badge-warn"><i class="fas fa-hourglass-half"></i> Chờ TT Duyệt</span>', 'PENDING_BGH': '<span class="badge badge-info bg-blue-100 text-blue-700 border-blue-300"><i class="fas fa-clipboard-check"></i> Chờ BGH Chốt</span>', 'FINALIZED': '<span class="badge badge-safe"><i class="fas fa-check-double"></i> Đã Chốt</span>' };
+<script>
+/* ================= CẤU HÌNH ================= */
+const firebaseConfig={apiKey:"AIzaSyBQ674rvyTsjbPBNMXscVE1LFY3uo1Neaw",authDomain:"class-rank-noi-tru-dak-song.firebaseapp.com",projectId:"class-rank-noi-tru-dak-song",storageBucket:"class-rank-noi-tru-dak-song.firebasestorage.app",messagingSenderId:"1087793103334",appId:"1:1087793103334:web:0c813d1d241f03529d1627"};
+const BASE=['artifacts','kpi-app-daksong','public','data'];
+const GAS_API_URL="https://script.google.com/macros/s/AKfycbwXSEJWFSfcpNhYFvLqd5AoTTKdpLKT9ulE_sPh5oyHq7CalRbxbYo2q2zyazwDuQU69w/exec";
+const CUTOFF='2026-09-30';
+const GS={1:100,2:150,3:200,4:250};
+// 6 trục - sửa tên tại đây cho đúng văn bản của trường/Sở
+const AXES=["TRỤC I - Giảng dạy, kiểm tra đánh giá, hồ sơ dữ liệu","TRỤC II - Chất lượng học sinh (phụ đạo, bồi dưỡng, ôn thi)","TRỤC III - Sinh hoạt chuyên môn, chuyên đề, STEM/KHKT","TRỤC IV - Công tác chủ nhiệm lớp","TRỤC V - Tư vấn học đường, quản lý nội trú, văn hóa","TRỤC VI - Chuyển đổi số, sáng kiến, hoạt động giáo dục, QP-AN"];
+// Danh mục mẫu: [trục(0-5), nhiệm vụ, nhóm]. Bổ sung thêm từ file mẫu/gợi ý trục 5-6 tại đây.
+const CAT=[[0,"Thực hiện đầy đủ chương trình, kế hoạch giáo dục môn học",1],[0,"Xây dựng và thực hiện kế hoạch bài dạy; chuẩn bị học liệu, thiết bị",1],[0,"Đổi mới phương pháp dạy học, tổ chức hoạt động học tích cực",2],[0,"Kiểm tra, đánh giá; xây dựng ma trận, đặc tả, đề, đáp án",2],[0,"Nhập điểm, nhận xét, cập nhật VNEDU, học bạ số, hồ sơ điện tử",1],[1,"Khảo sát, phân tích, phân loại học sinh theo kết quả học tập",2],[1,"Phụ đạo học sinh chưa đạt/yếu",3],[1,"Bồi dưỡng học sinh giỏi",3],[1,"Xây dựng và thực hiện giải pháp nâng cao chất lượng môn/lớp",2],[2,"Tham gia sinh hoạt tổ/nhóm, nghiên cứu bài học, dự giờ",1],[2,"Xây dựng/thực hiện chuyên đề cấp tổ",2],[2,"Hướng dẫn học sinh làm sản phẩm STEM, dự án KHKT",3],[3,"Xây dựng và thực hiện kế hoạch chủ nhiệm; quản lý hồ sơ lớp",2],[3,"Theo dõi học tập, rèn luyện, chuyên cần; phối hợp gia đình",2],[3,"Sinh hoạt lớp định hướng HĐTNHN, giáo dục kỹ năng, nề nếp",2],[4,"Trực/quản lý học sinh nội trú theo lịch; theo dõi nề nếp",2],[4,"Tư vấn, hỗ trợ học sinh theo kế hoạch Tổ tư vấn",3],[4,"Tổ chức hoạt động giáo dục kỹ năng sống, văn hóa dân tộc",2],[5,"Báo cáo định kỳ, cập nhật kết quả nhiệm vụ, cung cấp minh chứng KPI",1],[5,"Ứng dụng AI, công nghệ số trong dạy học, học liệu số",2],[5,"Tuyên truyền phòng chống bạo lực học đường, ma túy, tệ nạn xã hội",2],[5,"Thực hiện nhiệm vụ phát sinh do Hiệu trưởng/BGH/Tổ trưởng giao",1]];
+const RATE={X:'Hoàn thành xuất sắc nhiệm vụ',T:'Hoàn thành tốt nhiệm vụ',H:'Hoàn thành nhiệm vụ',K:'Không hoàn thành nhiệm vụ'};
+const ST={DRAFT:['Đang soạn','bg-slate-200 text-slate-700'],PENDING_MANAGER:['Chờ duyệt','bg-amber-100 text-amber-800'],FINALIZED:['Đã chốt','bg-emerald-100 text-emerald-800']};
 
-        function showToast(msg, type='success', isLoading=false) {
-            const container = document.getElementById('toast-container'); if(!container) return;
-            const toast = document.createElement('div'); toast.className = `toast toast-${type}`;
-            toast.innerHTML = (isLoading ? '<span class="loader"></span>' : (type==='error'?'<i class="fas fa-exclamation-circle text-lg"></i>':(type==='warning'?'<i class="fas fa-exclamation-triangle text-lg"></i>':'<i class="fas fa-check-circle text-lg"></i>'))) + `<span>${msg}</span>`;
-            container.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10);
-            if(!isLoading){ setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000); } return toast;
-        }
-        function removeToast(toast) { if(toast) { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); } }
+/* ================= TIỆN ÍCH ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f2=n=>(+n||0).toFixed(2);
+const vd=s=>s?s.split('-').reverse().join('/'):'';
+const sha=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+function toast(m,t='success',load=false){const e=document.createElement('div');e.className='toast '+({success:'bg-emerald-500',error:'bg-red-500',warning:'bg-amber-500',info:'bg-sky-600'}[t]);e.innerHTML=(load?'<span class="loader"></span>':'')+esc(m);$('toasts').appendChild(e);if(!load)setTimeout(()=>e.remove(),3000);return e}
+const fixDate=v=>{if(!v)return v;const p=v.split('-');if(p[0].length===4&&+p[0]<2000)p[0]=+p[0]+2000;return p.join('-')};
+function bd(a,b){let n=0;const e=new Date(b);e.setHours(0,0,0,0);for(let d=new Date(a);(d.setHours(0,0,0,0),d.setDate(d.getDate()+1),d<=e);){const w=d.getDay();if(w&&w<6)n++}return n}
+const delayOf=t=>{if(!t.deadline||t.objective)return 0;const end=t.doneDate||CUTOFF;return end>t.deadline?bd(t.deadline,end):0};
 
-        // === HÀM KHỞI TẠO CÓ TÍNH NĂNG BẮT LỖI ĐỎ ===
-        function initCloudAndSync() {
-            if (!auth) { 
-                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-times text-red-500"></i> Lỗi khởi tạo hệ thống!'; 
-                return; 
-            }
-            signInAnonymously(auth).then(() => {
-                onSnapshot(collection(db, ...basePath, 'users'), (snap) => {
-                    if (snap.empty) { 
-                        const adminUser = { id: 'admin1', username: 'admin', password: '1', role: 'admin', fullName: 'Quản trị viên', jobTitle: 'Admin', dept: 'BGH', email: '' }; 
-                        setDoc(doc(db, ...basePath, 'users', adminUser.id), adminUser); 
-                    } 
-                    else { 
-                        allUsers = snap.docs.map(d => ({ ...d.data(), id: d.id })); 
-                        if(document.getElementById('view-admin').classList.contains('block')) renderUsersTable(); 
-                        if(currentUser && (currentUser.role === 'tt' || currentUser.role === 'bgh')) populateManagerFilter(); 
-                    }
-                });
-                onSnapshot(doc(db, ...basePath, 'config', 'departments'), (snap) => {
-                    if (snap.exists) departments = snap.data().list || []; 
-                    else { 
-                        departments = ["Ban Giám Hiệu", "Tổ Toán - Lý - Tin", "Tổ Văn - Sử - Địa", "Tổ Hóa - Sinh", "Tổ Ngoại ngữ - QPAN", "Tổ Văn phòng"]; 
-                        setDoc(doc(db, ...basePath, 'config', 'departments'), { list: departments }); 
-                    }
-                    renderDepartments();
-                });
-                document.getElementById('cloud-status').innerHTML = '<i class="fas fa-check-circle text-emerald-500"></i> Đã kết nối!';
-                document.getElementById('btn-login').disabled = false;
-                document.getElementById('btn-login').className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg cursor-pointer transition-all";
-            }).catch(error => {
-                document.getElementById('cloud-status').innerHTML = `<i class="fas fa-exclamation-triangle text-red-600"></i> Lỗi máy chủ: ${error.message}`;
-                console.error("Firebase Auth Error: ", error);
-            });
-        }
-        window.onload = function() { setTimeout(initCloudAndSync, 500); };
+/* ================= FIREBASE ================= */
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore(),auth=firebase.auth();
+const cref=n=>db.collection([...BASE,n].join('/'));
+const dref=(n,id)=>db.doc([...BASE,n,id].join('/'));
+const kdoc=id=>dref('kpi_docs',id);
+let me=null,users=[],depts=[],viewUid=null,viewUser=null,tasks=[],docInfo=newDoc(),allDocs=[],unsubs=[],mode='self',prev=null;
+function newDoc(){return{status:'DRAFT',tc1:5,tc2:5,tc3:10,tc4:10,generalScore:30,note:''}}
 
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault(); const u = document.getElementById('username').value.trim(); const p = document.getElementById('password').value.trim();
-            const found = allUsers.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
-            if(!found) return showToast("Sai tài khoản hoặc mật khẩu!", "error");
-            currentUser = found; document.getElementById('user-display-name').textContent = currentUser.fullName;
-            document.getElementById('user-role-name').textContent = (currentUser.jobTitle || 'Giáo viên') + " - " + currentUser.dept;
-            document.getElementById('login-screen').classList.add('hidden'); document.getElementById('app-wrapper').classList.remove('hidden'); setTimeout(() => document.getElementById('app-wrapper').classList.remove('opacity-0'), 50);
-            if(currentUser.role === 'admin') { document.getElementById('nav-admin').classList.remove('hidden'); switchView('admin'); }
-            else { document.getElementById('nav-dashboard').classList.remove('hidden'); switchView('dashboard'); setupDashboardRole(); }
-        });
-        function handleLogout() { window.location.reload(); }
-        
-        function switchView(v) { 
-            document.getElementById('view-dashboard').classList.toggle('hidden', v !== 'dashboard'); document.getElementById('view-dashboard').classList.toggle('block', v === 'dashboard');
-            document.getElementById('view-admin').classList.toggle('hidden', v !== 'admin'); document.getElementById('view-admin').classList.toggle('block', v === 'admin');
-        }
+auth.signInAnonymously().then(()=>{
+ cref('users').onSnapshot(async s=>{
+  if(s.empty){await dref('users','admin1').set({username:'admin',passHash:await sha('admin@123'),role:'admin',fullName:'Quản trị viên',jobTitle:'Admin',dept:'BGH'});return}
+  users=s.docs.map(d=>({...d.data(),id:d.id}));
+  if(me){const u=users.find(x=>x.id===me.id);if(u)me=u;if(!$('v-admin').classList.contains('hide'))renderUsers()}
+ });
+ dref('config','departments').onSnapshot(s=>{if(s.exists)depts=s.data().list||[];else{depts=["Ban Giám Hiệu","Tổ Khoa học Xã hội","Tổ Khoa học Tự nhiên","Tổ Văn phòng"];dref('config','departments').set({list:depts})}renderDepts()});
+ cref('kpi_docs').onSnapshot(s=>{allDocs=s.docs.map(d=>({id:d.id,...d.data()}));if(me&&!$('v-reports').classList.contains('hide'))renderReports()});
+ $('cloud').textContent='Đã kết nối!';$('cloud').className='text-center text-sm font-bold text-emerald-600 mb-4';
+ $('btn-login').disabled=false;$('btn-login').className='w-full bg-sky-600 hover:bg-sky-700 text-white font-black py-3 rounded-xl';
+}).catch(e=>{$('cloud').textContent='Lỗi máy chủ: '+e.message});
 
-        function setupDashboardRole() {
-            const filterBar = document.getElementById('manager-filter-bar');
-            if (currentUser.role === 'gv') { filterBar.classList.add('hidden'); viewingUserId = currentUser.id; viewingUserObj = currentUser; loadTasksForViewingUser(); } 
-            else { 
-                filterBar.classList.remove('hidden'); populateManagerFilter(); 
-                if(currentUser.role === 'tt' || currentUser.role === 'bgh') document.getElementById('btn-export-phuluc3').classList.remove('hidden');
-                setTimeout(() => { const sel = document.getElementById('filter-user'); if(sel.options.length>1){ sel.selectedIndex=1; loadTasksForSelectedUser(); } }, 500);
-            }
-        }
-        function populateManagerFilter() {
-            const select = document.getElementById('filter-user'); select.innerHTML = '<option value="">-- Chọn Giáo viên / Nhân viên --</option>';
-            let list = (currentUser.role === 'tt') ? allUsers.filter(u => u.dept === currentUser.dept && u.role === 'gv') : allUsers.filter(u => u.role !== 'admin' && u.role !== 'bgh');
-            list.forEach(u => { select.innerHTML += `<option value="${u.id}">${u.fullName} (${u.jobTitle || 'GV'})</option>`; });
-        }
-        function loadTasksForSelectedUser() {
-            const uid = document.getElementById('filter-user').value;
-            if(!uid) { viewingUserId = null; viewingUserObj = null; tasks = []; renderKPITable(); return; }
-            viewingUserId = uid; viewingUserObj = allUsers.find(u => u.id === uid); loadTasksForViewingUser();
-        }
+$('login-form').onsubmit=async e=>{
+ e.preventDefault();const un=$('username').value.trim().toLowerCase(),p=$('password').value,h=await sha(p);
+ const u=users.find(x=>(x.username||'').toLowerCase()===un&&(x.passHash?x.passHash===h:x.password===p));
+ if(!u)return toast('Sai tài khoản hoặc mật khẩu!','error');
+ if(!u.passHash)dref('users',u.id).update({passHash:h,password:firebase.firestore.FieldValue.delete()}); // nâng cấp mật khẩu cũ -> băm
+ me=u;$('u-name').textContent=u.fullName;$('u-role').textContent=(u.jobTitle||'Giáo viên')+' - '+(u.dept||'');
+ $('login').classList.add('hide');$('app').classList.remove('hide');buildNav();navTo(u.role==='admin'?'admin':'profile');
+};
 
-        let unsubDoc = null; let unsubTasks = null;
-        function loadTasksForViewingUser() {
-            if(unsubDoc) unsubDoc(); if(unsubTasks) unsubTasks();
-            unsubDoc = onSnapshot(doc(db, ...basePath, 'kpi_docs', viewingUserId), (snap) => {
-                if(snap.exists) viewingDocInfo = snap.data(); 
-                else { viewingDocInfo = { status: 'DRAFT', tc1: 5, tc2: 5, tc3: 10, tc4: 10, generalScore: 30 }; if(viewingUserId === currentUser.id && currentUser.role==='gv') setDoc(doc(db,...basePath,'kpi_docs',viewingUserId), viewingDocInfo); }
-                document.getElementById('general-score').value = viewingDocInfo.generalScore; document.getElementById('doc-status-badge').innerHTML = STATUS_NAMES[viewingDocInfo.status];
-                updateActionButtons(); renderKPITable();
-            });
-            unsubTasks = onSnapshot(collection(db, ...basePath, 'kpi_tasks'), (snap) => {
-                tasks = snap.docs.map(d => ({...d.data(), id: d.id})).filter(t => t.userId === viewingUserId); tasks.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
-                renderKPITable();
-            });
-        }
+/* ================= PHÂN QUYỀN & ĐIỀU HƯỚNG ================= */
+const isHT=u=>(u.jobTitle||'').toLowerCase().includes('hiệu trưởng')&&!(u.jobTitle||'').toLowerCase().includes('phó');
+function subordinates(){ // cấp dưới của người đăng nhập
+ if(me.role==='tt')return users.filter(u=>u.dept===me.dept&&u.role==='gv');
+ if(me.role==='bgh')return isHT(me)?users.filter(u=>u.id!==me.id&&u.role!=='admin'):users.filter(u=>u.role==='tt');
+ return[];
+}
+function buildNav(){
+ const t=[['profile','user-edit','Thông tin cá nhân'],['register','sitemap','Đăng ký & Giao việc'],['self','clipboard-list','Tự đánh giá (Phụ lục II)']];
+ if(['tt','bgh'].includes(me.role))t.push(['mgr','users-cog','Đánh giá cấp dưới'],['reports','chart-pie','Tổng hợp (Phụ lục III)']);
+ if(me.role==='admin')t.splice(0,3,['admin','cogs','Quản trị hệ thống']);
+ $('nav').innerHTML=t.map(x=>`<div class="nt" id="t-${x[0]}" onclick="navTo('${x[0]}')"><i class="fas fa-${x[1]} mr-2"></i>${x[2]}</div>`).join('');
+ $('assign-box').classList.toggle('hide',!subordinates().length);
+ $('r-target').innerHTML='<option value="">-- Tự đăng ký cho bản thân --</option>'+subordinates().map(u=>`<option value="${u.id}">${esc(u.fullName)} (${esc(u.jobTitle||'GV')})</option>`).join('');
+}
+function navTo(n){
+ document.querySelectorAll('.nt').forEach(e=>e.classList.remove('on'));$('t-'+n)?.classList.add('on');
+ ['profile','register','kpi','reports','admin'].forEach(v=>$('v-'+v).classList.add('hide'));
+ const v=n==='self'||n==='mgr'?'kpi':n;$('v-'+v).classList.remove('hide');mode=n;
+ if(n==='profile')fillProfile();
+ if(n==='register')fillRegister();
+ if(n==='self'){$('mgr-bar').classList.add('hide');$('mgr-bar').classList.remove('flex');loadView(me.id)}
+ if(n==='mgr'){$('mgr-bar').classList.remove('hide');$('mgr-bar').classList.add('flex');const l=subordinates();$('f-user').innerHTML='<option value="">-- Chọn cấp dưới --</option>'+l.map(u=>`<option value="${u.id}">${esc(u.fullName)} (${esc(u.jobTitle||'GV')}) - ${esc(u.dept||'')}</option>`).join('');loadView('')}
+ if(n==='reports')renderReports();
+ if(n==='admin'){renderDepts();renderUsers()}
+}
 
-        function getBusinessDaysDiff(startDateStr, endDateStr) {
-            const start = new Date(startDateStr); start.setHours(0,0,0,0); const end = new Date(endDateStr); end.setHours(0,0,0,0);
-            if(end <= start) return 0; 
-            let count = 0; let cur = new Date(start.getTime()); cur.setDate(cur.getDate() + 1); 
-            while(cur <= end) { const day = cur.getDay(); if(day !== 0 && day !== 6) count++; cur.setDate(cur.getDate() + 1); }
-            return count;
-        }
+/* ================= HỒ SƠ ================= */
+function fillProfile(){$('p-name').value=me.fullName||'';$('p-dob').value=me.dob||'';$('p-job').value=(me.jobTitle||'')+' - '+(me.dept||'');$('p-subject').value=me.subject||'';$('p-duties').value=me.duties||'';$('p-pass').value=''}
+async function saveProfile(e){e.preventDefault();const d={fullName:$('p-name').value.trim(),dob:$('p-dob').value,subject:$('p-subject').value.trim(),duties:$('p-duties').value.trim()};const p=$('p-pass').value;if(p)d.passHash=await sha(p);
+ try{await dref('users',me.id).update(d);$('u-name').textContent=d.fullName;toast('Đã cập nhật!')}catch(x){toast('Lỗi cập nhật!','error')}}
 
-        function calculateDateLogic(task) {
-            let html = '<span class="badge badge-neutral">Chưa đặt hạn</span>'; let autoDelay = 0;
-            if (task.deadline) {
-                const today = new Date(); today.setHours(0,0,0,0); const dl = new Date(task.deadline); dl.setHours(0,0,0,0);
-                if (task.completedDate) {
-                    const comp = new Date(task.completedDate); comp.setHours(0,0,0,0);
-                    if (comp <= dl) { html = `<span class="badge badge-safe"><i class="fas fa-check"></i> Đúng hạn</span>`; autoDelay = 0; }
-                    else { autoDelay = getBusinessDaysDiff(task.deadline, task.completedDate); html = `<span class="badge badge-danger"><i class="fas fa-times"></i> Trễ ${autoDelay} ngày LV</span>`; }
-                } else {
-                    const diff = Math.ceil((dl - today) / 86400000);
-                    if (diff >= 0) { html = `<span class="badge badge-safe"><i class="far fa-clock"></i> Còn ${diff} ngày</span>`; }
-                    else { autoDelay = getBusinessDaysDiff(task.deadline, new Date().toISOString().split('T')[0]); html = `<span class="badge badge-danger"><i class="fas fa-fire"></i> Trễ ${autoDelay} ngày LV</span>`; }
-                }
-            }
-            return { html, autoDelayDays: autoDelay };
-        }
+/* ================= ĐĂNG KÝ / GIAO VIỆC ================= */
+function fillRegister(){$('r-axis').innerHTML=AXES.map((a,i)=>`<option value="${i}">${esc(a.split(' - ')[0])}</option>`).join('');
+ $('r-cat').innerHTML='<option value="">-- Chọn từ danh mục mẫu (hoặc tự nhập bên dưới) --</option>'+CAT.map((c,i)=>`<option value="${i}">[${AXES[c[0]].split(' - ')[0]}] ${esc(c[1])} (N${c[2]})</option>`).join('')}
+function fillCat(){const c=CAT[$('r-cat').value];if(!c)return;$('r-axis').value=c[0];$('r-name').value=c[1];$('r-group').value=c[2]}
+const mkTask=(uid,o={})=>({userId:uid,axis:0,name:'',group:'1',product:'',qty:'',deadline:'',doneDate:'',completion:100,errorCount:0,exceed:false,objective:false,note:'',evidenceUrl:'',assignedBy:me.id,createdAt:Date.now(),...o});
+async function addTask(e){e.preventDefault();const uid=$('r-target').value||me.id;
+ try{await cref('kpi_tasks').add(mkTask(uid,{axis:+$('r-axis').value,name:$('r-name').value.trim(),group:$('r-group').value,product:$('r-product').value.trim(),qty:$('r-qty').value.trim(),deadline:$('r-deadline').value}));
+ ['r-name','r-product','r-qty','r-deadline'].forEach(i=>$(i).value='');toast(uid===me.id?'Đã đăng ký vào Phụ lục II của bạn!':'Đã giao việc!')}catch(x){toast('Lỗi!','error')}}
 
-        function fixXiaomiDate(val) {
-            if(!val) return val; let parts = val.split('-');
-            if(parts[0].length === 4 && parseInt(parts[0]) < 2000) { parts[0] = (parseInt(parts[0]) + 2000).toString(); return parts.join('-'); }
-            return val;
-        }
+/* ================= TÍNH ĐIỂM (theo CV Sở GDĐT, mục 5-6) ================= */
+function calc(ts){
+ let base=0,act=0;
+ const rows=ts.map(t=>{const b=GS[t.group]||100,A=b*Math.min(100,t.completion??100)/100,B=Math.max(0,b*(1-.05*(t.errorCount||0))),d=delayOf(t),C=Math.max(0,b*(1-.05*d)),a=(A+B+C)/3;base+=b;act+=a;return{t,b,A,B,C,d,a}});
+ const ax={};rows.forEach(r=>{const x=ax[r.t.axis]=ax[r.t.axis]||{b:0,a:0};x.b+=r.b;x.a+=r.a});
+ Object.values(ax).forEach(x=>{x.max=base?70*x.b/base:0;x.kpi=x.b?x.a/x.b*x.max:0;x.pct=x.b?x.a/x.b:0});
+ rows.forEach(r=>r.kpi=base?r.a/base*70:0);
+ const n=ts.length,over=ts.filter(t=>t.exceed).length,late=rows.filter(r=>r.d>0||(r.t.completion??100)<100).length;
+ return{rows,ax,base,kpi:base?act/base*70:0,n,over,late,allDone:n>0&&ts.every(t=>(t.completion??100)>=100),onTime:rows.every(r=>r.d===0),over30:n>0&&over/n>=.3};
+}
+function rate(total,c,note){
+ const ok=c.allDone&&c.onTime&&c.over30&&!!(note||'').trim();
+ if(total>=90&&ok)return{k:'X',elig:true};
+ if(total>=70)return{k:'T',elig:total>=90&&ok};
+ return{k:total>=50?'H':'K',elig:false};
+}
 
-        async function updateTaskInDB(taskId, data) { try { await updateDoc(doc(db, ...basePath, 'kpi_tasks', String(taskId)), data); } catch(e) {} }
-        function updateTaskLocal(id, field, value) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                let val = value; 
-                if(field === 'deadline') val = fixXiaomiDate(val);
-                if(['completion', 'errorCount'].includes(field)) { val = val === '' ? 0 : parseFloat(val); if(field === 'completion' && val > 100) val = 100; }
-                task[field] = val; updateTaskInDB(id, { [field]: val }); calculateTotal();
-            }
-        }
+/* ================= BẢNG KPI (PHỤ LỤC II) ================= */
+function loadView(uid){
+ unsubs.forEach(f=>f());unsubs=[];viewUid=uid||null;viewUser=users.find(u=>u.id===uid)||null;tasks=[];docInfo=newDoc();
+ if(!viewUid)return render();
+ unsubs.push(kdoc(uid).onSnapshot(s=>{docInfo=s.exists?{...newDoc(),...s.data()}:newDoc();render()}));
+ unsubs.push(cref('kpi_tasks').where('userId','==',uid).onSnapshot(s=>{tasks=s.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));render()}));
+}
+const perm=()=>{const self=viewUid===me.id,s=docInfo.status;return{self,edit:self&&s==='DRAFT',mgr:!self&&s==='PENDING_MANAGER'}};
+function inp(t,f,ok,type='text',cls=''){const v=t[f]??'';return`<input type="${type}" class="ti ${cls}${ok?'':' ro'}" value="${esc(v)}" ${ok?'':'readonly'} onchange="upd('${t.id}','${f}',this)">`}
+function chk(t,f,ok){return`<input type="checkbox" ${t[f]?'checked':''} ${ok?'':'disabled'} onchange="upd('${t.id}','${f}',this)" class="w-4 h-4">`}
+function render(){
+ const p=perm(),c=calc(tasks);
+ $('btn-add').classList.toggle('hide',!p.edit||!viewUid);
+ $('st-badge').innerHTML=viewUid?`<span class="bd ${ST[docInfo.status][1]}">${ST[docInfo.status][0]}</span>`:'';
+ let h='';let stt=0;
+ AXES.forEach((an,ai)=>{const rs=c.rows.filter(r=>+r.t.axis===ai);if(!rs.length&&!(p.edit))return;const x=c.ax[ai];
+  if(rs.length)h+=`<tr class="ax"><td colspan="12">${esc(an)} — tối đa ${f2(x.max)} điểm</td><td class="text-center">${f2(x.pct*100)}%</td><td class="text-center">${f2(x.kpi)}</td><td></td></tr>`;
+  rs.forEach(r=>{const t=r.t;stt++;
+   h+=`<tr><td class="text-center font-bold text-slate-400">${stt}</td>
+   <td>${inp(t,'name',p.edit)}<select class="ti mt-1 text-xs ${p.edit?'':'ro'}" ${p.edit?'':'disabled'} onchange="upd('${t.id}','axis',this)">${AXES.map((a,i)=>`<option value="${i}" ${i===+t.axis?'selected':''}>${esc(a.split(' - ')[0])}</option>`).join('')}</select></td>
+   <td><select class="ti ${p.edit?'':'ro'}" ${p.edit?'':'disabled'} onchange="upd('${t.id}','group',this)">${[1,2,3,4].map(g=>`<option value="${g}" ${g==t.group?'selected':''}>N${g} (${GS[g]})</option>`).join('')}</select></td>
+   <td class="text-center font-black text-amber-500">${r.b}</td>
+   <td>${inp(t,'product',p.edit)}<div class="mt-1">${inp(t,'qty',p.edit)}</div></td>
+   <td>${inp(t,'deadline',p.edit,'date')}</td>
+   <td>${inp(t,'doneDate',p.edit,'date')}${t.evidenceUrl?`<a href="${esc(t.evidenceUrl)}" target="_blank" class="text-xs text-sky-700 font-bold">Xem minh chứng</a>`:(p.edit?`<button onclick="upload('${t.id}')" class="text-[11px] text-slate-600 underline">Up minh chứng</button>`:'')}</td>
+   <td>${inp(t,'completion',p.edit||p.mgr,'number','text-center')}</td>
+   <td>${inp(t,'errorCount',p.edit||p.mgr,'number','text-center text-red-600')}</td>
+   <td class="text-center">${chk(t,'exceed',p.edit||p.mgr)}</td>
+   <td class="text-center" title="Chậm do khách quan/bất khả kháng có xác nhận: không trừ điểm">${chk(t,'objective',p.edit||p.mgr)}</td>
+   <td class="text-center font-bold text-red-500">${r.d}</td>
+   <td class="text-center font-bold" title="A=${f2(r.A)} | B=${f2(r.B)} | C=${f2(r.C)}">${f2(r.a)}</td>
+   <td class="text-center font-black text-emerald-600 bg-emerald-50">${f2(r.kpi)}</td>
+   <td class="text-center">${p.edit?`<button onclick="delTask('${t.id}')" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>`:''}</td></tr>`})});
+ $('kpi-body').innerHTML=h||'<tr><td colspan="15" class="text-center text-slate-400 py-6 italic">Chưa có nhiệm vụ.</td></tr>';
+ $('t-base').textContent=c.base;$('t-kpi').textContent=f2(c.kpi);
+ const gen=docInfo.generalScore??30,total=gen+c.kpi,rt=rate(total,c,docInfo.note);
+ $('s-gen').textContent=gen+' / 30';$('s-kpi').textContent=f2(c.kpi)+' / 70';$('s-total').textContent=f2(total);$('s-note').value=docInfo.note||'';$('s-note').readOnly=!(p.edit);
+ const cls={X:'bg-sky-100 text-sky-800 border-sky-300',T:'bg-emerald-100 text-emerald-800 border-emerald-300',H:'bg-amber-100 text-amber-800 border-amber-300',K:'bg-red-100 text-red-800 border-red-300'}[rt.k];
+ $('s-rating').className='mx-auto my-3 px-6 py-4 rounded-2xl border-2 font-black text-xl text-center '+cls;$('s-rating').textContent=RATE[rt.k];
+ const cond=[[c.allDone&&c.n>0,'Hoàn thành 100% nhiệm vụ'],[c.onTime,'Không trễ tiến độ do chủ quan'],[c.over30,`≥30% nhiệm vụ vượt mức (${c.over}/${c.n})`],[!!(docInfo.note||'').trim(),'Có mô tả sản phẩm nổi trội'],[total>=90,'Tổng điểm ≥ 90']];
+ $('s-cond').innerHTML='<li class="font-bold text-slate-500">Điều kiện "Hoàn thành xuất sắc":</li>'+cond.map(x=>`<li class="${x[0]?'text-emerald-600':'text-red-500'}"><i class="fas fa-${x[0]?'check':'times'}-circle"></i> ${x[1]}</li>`).join('');
+ $('btn-30').disabled=!(p.edit||p.mgr);$('btn-30').classList.toggle('opacity-50',$('btn-30').disabled);
+ actions();
+ persist(c,rate(total,c,docInfo.note),total);
+}
+function actions(){
+ const p=perm(),s=docInfo.status,a=$('actions');a.innerHTML='';if(!viewUid)return;
+ const b=(st,txt,cl)=>`<button onclick="setStatus('${st}')" class="w-full ${cl} py-3 rounded-xl font-black">${txt}</button>`;
+ if(p.self)a.innerHTML=s==='DRAFT'?b('PENDING_MANAGER','<i class="fas fa-paper-plane"></i> NỘP PHIẾU CHO CẤP TRÊN DUYỆT','bg-sky-600 text-white'):`<div class="bg-slate-100 p-3 rounded-xl text-center font-bold"><i class="fas fa-lock"></i> Phiếu đã nộp / đã chốt.</div>`;
+ else a.innerHTML=s==='PENDING_MANAGER'?b('FINALIZED','<i class="fas fa-stamp"></i> CHỐT ĐIỂM','bg-emerald-600 text-white')+b('DRAFT','<i class="fas fa-undo"></i> Trả lại cấp dưới sửa','bg-amber-100 text-amber-800'):s==='FINALIZED'?b('PENDING_MANAGER','Mở lại để chấm','bg-slate-200 text-slate-700'):`<div class="bg-slate-100 p-3 rounded-xl text-center text-sm">Chờ cấp dưới nộp phiếu.</div>`;
+}
+async function setStatus(st){if(!confirm('Xác nhận đổi trạng thái phiếu?'))return;await kdoc(viewUid).set({status:st},{merge:true});toast('Đã cập nhật!')}
+// chỉ ghi khi giá trị thay đổi -> không lặp vô hạn
+let pt;function persist(c,r,total){
+ const o={status:docInfo.status,kpi:+f2(c.kpi),total:+f2(total),rating:RATE[r.k],eligible:r.elig,n:c.n,over:c.over,late:c.late,generalScore:docInfo.generalScore??30};
+ if(!viewUid||docInfo.status==='FINALIZED'||Object.keys(o).every(k=>docInfo[k]===o[k]))return;
+ clearTimeout(pt);const id=viewUid;pt=setTimeout(()=>kdoc(id).set(o,{merge:true}).catch(console.error),700);
+}
+async function upd(id,f,el){
+ let v=el.type==='checkbox'?el.checked:el.type==='number'?(+el.value||0):el.value;
+ if(f==='completion')v=Math.min(100,Math.max(0,v));if(f==='deadline'||f==='doneDate')v=fixDate(v);if(f==='axis')v=+v;
+ try{await cref('kpi_tasks').doc(id).update({[f]:v})}catch(e){toast('Lỗi lưu!','error')}
+}
+async function addBlank(){if(!perm().edit)return;await cref('kpi_tasks').add(mkTask(viewUid))}
+async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}}
+async function saveNote(v){await kdoc(viewUid).set({note:v},{merge:true})}
+async function upload(id){
+ const i=document.createElement('input');i.type='file';i.onchange=()=>{const f=i.files[0];if(!f)return;if(f.size>10*1024*1024)return toast('File tối đa 10 MB!','warning');
+  const l=toast('Đang tải lên Drive...','info',true),r=new FileReader();
+  r.onload=async()=>{try{const x=await(await fetch(GAS_API_URL,{method:'POST',body:JSON.stringify({action:'upload',fileName:f.name,mimeType:f.type,fileData:r.result.split(',')[1]})})).json();l.remove();
+   if(x.status==='success'){await cref('kpi_tasks').doc(id).update({evidenceUrl:x.fileUrl});toast('Tải lên thành công!')}else toast('Lỗi Drive: '+x.message,'error')}catch(e){l.remove();toast('Lỗi mạng!','error')}};
+  r.readAsDataURL(f)};i.click();
+}
 
-        async function addTaskRow() {
-            if(viewingDocInfo.status !== 'DRAFT') return showToast("Phiếu đã chốt!", "warning");
-            const newTask = { userId: viewingUserId, name: "", group: "1", deadline: "", completedDate: null, completion: 0, errorCount: 0, delayDays: 0, evidenceUrl: "", createdAt: Date.now() };
-            try { await addDoc(collection(db, ...basePath, 'kpi_tasks'), newTask); } catch(e) {}
-        }
-        async function markCompleted(id) {
-            const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            await updateTaskInDB(id, { completedDate: dateStr, completion: 100 }); showToast("Đã xác nhận thời gian!");
-        }
+/* ================= TIÊU CHÍ CHUNG 30 ĐIỂM ================= */
+const TC=[['tc1','1. Tư tưởng chính trị',5],['tc2','2. Đạo đức, lối sống',5],['tc3','3. Tác phong, lề lối làm việc',10],['tc4','4. Ý thức tổ chức kỷ luật',10]];
+function open30(){$('m30-body').innerHTML=TC.map(t=>`<div class="bg-white p-3 rounded-xl border flex justify-between items-center"><b class="text-sm">${t[1]}</b><span><input type="number" id="${t[0]}" min="0" max="${t[2]}" value="${docInfo[t[0]]??t[2]}" onchange="calc30()" class="w-16 ti text-center font-bold"> / ${t[2]}</span></div>`).join('');calc30();$('m30').classList.remove('hide')}
+function calc30(){let s=0;TC.forEach(t=>{const e=$(t[0]);e.value=Math.min(t[2],Math.max(0,parseInt(e.value)||0));s+=+e.value});$('tc-total').textContent=s}
+async function save30(){const d={generalScore:+$('tc-total').textContent};TC.forEach(t=>d[t[0]]=+$(t[0]).value);await kdoc(viewUid).set(d,{merge:true});$('m30').classList.add('hide');toast('Đã lưu tiêu chí chung!')}
 
-        async function uploadEvidence(taskId) {
-            const input = document.createElement('input'); input.type = 'file';
-            input.onchange = async (e) => {
-                const file = e.target.files[0]; if(!file) return;
-                const loader = showToast(`Đang đẩy lên Drive...`, 'info', true);
-                const reader = new FileReader();
-                reader.onload = async function() {
-                    const base64 = reader.result.split(',')[1];
-                    try {
-                        const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "upload", fileName: file.name, mimeType: file.type, fileData: base64 }) });
-                        const result = await res.json(); removeToast(loader);
-                        if(result.status === "success") { await updateTaskInDB(taskId, { evidenceUrl: result.fileUrl }); showToast("Upload thành công!"); } 
-                        else { showToast("Lỗi Drive: " + result.message, "error"); }
-                    } catch(err) { removeToast(loader); showToast("Lỗi mạng!", "error"); }
-                }; reader.readAsDataURL(file);
-            }; input.click();
-        }
+/* ================= PHỤ LỤC III ================= */
+function reportData(){
+ const rows=subordinates().map(u=>{const d=allDocs.find(x=>x.id===u.id)||{status:'DRAFT',generalScore:30,kpi:0,total:0,n:0,over:0,late:0,rating:'Chưa đánh giá'};return{u,d,fin:d.status==='FINALIZED'}});
+ const htt=rows.filter(r=>r.fin&&(r.d.total||0)>=70).length,quota=Math.round(htt*0.2+1e-9);
+ const elig=rows.filter(r=>r.fin&&r.d.eligible).sort((a,b)=>b.d.kpi-a.d.kpi||(b.d.over/(b.d.n||1))-(a.d.over/(a.d.n||1)));
+ const chosen=new Set(elig.slice(0,quota).map(r=>r.u.id));
+ rows.forEach(r=>{r.prop=chosen.has(r.u.id)?RATE.X:(r.fin?(r.d.eligible?RATE.T:r.d.rating):'---')});
+ return{rows,htt,quota,elig,chosen};
+}
+function renderReports(){
+ const R=reportData();
+ $('quota-line').textContent=`Số người HTT: ${R.htt} → tối đa ${R.quota} HTXS | Đủ điều kiện: ${R.elig.length} | Đề xuất: ${R.chosen.size}. (Chỉ tính phiếu đã chốt.)`;
+ $('rep-body').innerHTML=R.rows.map((r,i)=>`<tr><td class="text-center">${i+1}</td><td class="font-bold">${esc(r.u.fullName)}</td><td class="text-xs">${esc(r.u.jobTitle||'GV')} - ${esc(r.u.dept||'')}</td><td><span class="bd ${ST[r.d.status||'DRAFT'][1]}">${ST[r.d.status||'DRAFT'][0]}</span></td><td class="text-center">${r.d.n||0}</td><td class="text-center font-bold text-emerald-600">${f2(r.d.kpi)}</td><td class="text-center">${r.d.generalScore??30}</td><td class="text-center font-black text-amber-600">${f2(r.d.total)}</td><td class="text-center">${r.d.over||0}</td><td class="text-center">${r.d.late||0}</td><td class="text-xs">${esc(r.d.rating||'---')}</td><td class="text-xs font-bold ${r.prop===RATE.X?'text-sky-700':''}">${esc(r.prop)}</td></tr>`).join('')||'<tr><td colspan="12" class="text-center py-6 text-slate-400">Không có cấp dưới.</td></tr>';
+}
 
-        function renderKPITable() {
-            const tbody = document.getElementById('kpi-tbody'); tbody.innerHTML = '';
-            if(!viewingUserId) return;
-            const status = viewingDocInfo.status;
-            const canEdit = (currentUser.role === 'gv' && status === 'DRAFT');
-            const canDuyet = ((currentUser.role === 'tt' && status === 'PENDING_TT') || (currentUser.role === 'bgh' && status === 'PENDING_BGH'));
+/* ================= XUẤT FILE + XEM TRƯỚC ================= */
+const B='border:1px solid #000;padding:4px;',C=B+'text-align:center;';
+const WORD_HEAD=t=>`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><title>${t}</title><style>@page{size:841.9pt 595.3pt;mso-page-orientation:landscape;margin:42pt}body{font-family:'Times New Roman',serif;font-size:11pt}table{border-collapse:collapse}</style></head><body>`;
+function htmlII(u,ts,d){
+ const c=calc(ts),gen=d.generalScore??30,total=gen+c.kpi,rt=rate(total,c,d.note),chk=x=>x?'☑':'□';
+ const grp=u.role==='gv'?2:(u.role==='bgh'&&isHT(u)?0:1);
+ let body='';
+ AXES.forEach((an,ai)=>{const rs=c.rows.filter(r=>+r.t.axis===ai);if(!rs.length)return;const x=c.ax[ai];
+  body+=`<tr><td colspan="15" style="${B}font-weight:bold;background:#e5e7eb">${esc(an)} (${f2(x.max)} điểm)</td><td style="${C}">${f2(x.pct*100)}%</td><td style="${C}">${f2(x.max)}</td><td style="${C}"><b>${f2(x.kpi)}</b></td><td style="${B}"></td></tr>`;
+  rs.forEach((r,i)=>{const t=r.t,pc=(t.completion??100)/100;body+=`<tr><td style="${C}">${i+1}</td><td style="${B}">${esc(t.name)}${t.exceed?' <i>(vượt mức)</i>':''}</td><td style="${C}">Nhóm ${t.group}</td><td style="${C}">${r.b}</td><td style="${B}">${esc(t.product)}</td><td style="${C}">${esc(t.qty)}</td><td style="${C}">${vd(t.deadline)}</td><td style="${C}">${r.b}</td><td style="${C}">${pc}</td><td style="${C}">${f2(r.A)}</td><td style="${C}">${t.errorCount||0}</td><td style="${C}">${f2(r.B)}</td><td style="${C}">${vd(t.doneDate)}${r.d?` (trễ ${r.d})`:''}</td><td style="${C}">${f2(r.C)}</td><td style="${C}"><b>${f2(r.a)}</b></td><td style="${C}"></td><td style="${C}"></td><td style="${C}">${f2(r.kpi)}</td><td style="${B}">${t.objective?'Chậm/lỗi do khách quan':''}</td></tr>`})});
+ const th=s=>`<th style="${C}background:#f3f4f6">${s}</th>`;
+ return WORD_HEAD('Phụ lục II')+`<table style="width:100%;border:none"><tr><td style="text-align:center;width:40%">SỞ GIÁO DỤC VÀ ĐÀO TẠO LÂM ĐỒNG<br><b>TRƯỜNG PTDTNT THCS & THPT ĐẮK SONG</b></td><td style="text-align:center"><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</b></td></tr></table>
+ <p style="text-align:center"><b>PHỤ LỤC II<br>PHIẾU CHẤM ĐIỂM KPI VÀ TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN QUÝ III NĂM 2026</b></p>
+ <p>Họ và tên: <b>${esc(u.fullName)}</b><br>Chức vụ/chức danh, vị trí việc làm: ${esc(u.jobTitle||'Giáo viên')}${u.duties?' - '+esc(u.duties):''}<br>Phòng, đơn vị: Trường PTDTNT THCS & THPT Đắk Song${u.dept?' - '+esc(u.dept):''}<br>
+ Nhóm đối tượng: ${chk(grp===0)} Trưởng phòng/Người đứng đầu đơn vị &nbsp; ${chk(grp===1)} Cấp phó &nbsp; ${chk(grp===2)} Công chức, viên chức không giữ chức vụ lãnh đạo, quản lý<br>Nguồn nhiệm vụ: ${chk(false)} Phụ lục 3 &nbsp; ${chk(false)} Phụ lục 4 &nbsp; ${chk(true)} Kế hoạch/văn bản phân công chi tiết &nbsp; ${chk(ts.some(t=>t.assignedBy&&t.assignedBy!==u.id&&false))} Nhiệm vụ phát sinh hợp lệ</p>
+ <p><b>I. KẾT QUẢ THỰC HIỆN NHIỆM VỤ THEO KPI (70 ĐIỂM)</b></p>
+ <table style="width:100%;font-size:9pt"><tr>${['TT','Nhiệm vụ được giao','Phân nhóm','Điểm chuẩn','Sản phẩm cụ thể','Số lượng','Thời hạn','Điểm (8)','Thực tế HT (9)','Điểm A (10)','Số lần sửa (11)','Điểm B (12)','Ngày hoàn thành (13)','Điểm C (14)','Tổng điểm thực tế (15)','Điểm KPI % (16)','Điểm tối đa (17)','Điểm đạt (18)','Ghi chú (19)'].map(th).join('')}</tr>${body}
+ <tr><td colspan="3" style="${B}"><b>Tổng điểm chuẩn toàn bộ nhiệm vụ:</b></td><td style="${C}"><b>${c.base}</b></td><td colspan="13" style="${B}text-align:right"><b>Tổng điểm KPI quy đổi:</b></td><td style="${C}"><b>${f2(c.kpi)}</b></td><td style="${B}">/ 70</td></tr></table>
+ <p><b>II. TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN</b></p>
+ <table style="width:70%"><tr>${th('Nội dung')}${th('Điểm tối đa')}${th('Cá nhân tự chấm')}${th('Điểm sau rà soát, xác nhận')}</tr>
+ <tr><td style="${B}">Nhóm tiêu chí chung theo biểu mẫu của cơ quan Đảng</td><td style="${C}">30</td><td style="${C}">${gen}</td><td style="${C}"></td></tr>
+ <tr><td style="${B}">Kết quả thực hiện nhiệm vụ theo KPI</td><td style="${C}">70</td><td style="${C}">${f2(c.kpi)}</td><td style="${C}"></td></tr>
+ <tr><td style="${B}"><b>TỔNG ĐIỂM</b></td><td style="${C}">100</td><td style="${C}"><b>${f2(total)}</b></td><td style="${C}"></td></tr></table>
+ <p><b>III. TỰ ĐỀ XUẤT MỨC XẾP LOẠI</b></p>
+ <table style="width:70%"><tr>${th('Mức xếp loại')}${th('Khung điểm và điều kiện')}${th('Cá nhân tự đề xuất')}</tr>
+ ${[['X','Hoàn thành xuất sắc nhiệm vụ','Từ 90 điểm trở lên và đáp ứng đầy đủ điều kiện kèm theo'],['T','Hoàn thành tốt nhiệm vụ','Từ 70 đến dưới 90 điểm và đáp ứng điều kiện của mức xếp loại'],['H','Hoàn thành nhiệm vụ','Từ 50 đến dưới 70 điểm và đáp ứng điều kiện của mức xếp loại'],['K','Không hoàn thành nhiệm vụ','Dưới 50 điểm hoặc thuộc trường hợp phải xếp loại không hoàn thành']].map(x=>`<tr><td style="${B}">${x[1]}</td><td style="${B}">${x[2]}</td><td style="${C}">${chk(rt.k===x[0])}</td></tr>`).join('')}</table>
+ <p>Kết quả, sản phẩm nổi trội hoặc vượt mức yêu cầu (nếu đề xuất Hoàn thành xuất sắc nhiệm vụ): ${esc(d.note||'..........................................................................')}</p>
+ <table style="width:100%;border:none;text-align:center"><tr><td><b>CÁ NHÂN TỰ ĐÁNH GIÁ</b><br><i>(Ký, ghi rõ họ tên)</i><br><br><br><br>${esc(u.fullName)}</td><td><b>NGƯỜI TRỰC TIẾP NHẬN XÉT, ĐỀ XUẤT</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>XÁC NHẬN CỦA LÃNH ĐẠO PHỤ TRÁCH</b><br><i>(Ký, ghi rõ họ tên)</i></td></tr></table></body></html>`;
+}
+function htmlIII(){
+ const R=reportData(),th=s=>`<th style="${C}background:#f3f4f6">${s}</th>`;
+ const tb=R.rows.map((r,i)=>`<tr><td style="${C}">${i+1}</td><td style="${B}">${esc(r.u.fullName)}</td><td style="${B}">${esc(r.u.jobTitle||'GV')}</td><td style="${C}">${esc(r.u.dept||'')}</td><td style="${C}">${r.d.n||0}</td><td style="${C}">${f2(r.d.kpi)}</td><td style="${C}">${r.d.generalScore??30}</td><td style="${C}">${f2(r.d.total)}</td><td style="${C}">${r.d.over||0}</td><td style="${C}">${r.d.late||0}</td><td style="${B}">${esc(r.d.rating||'')}</td><td style="${B}">${esc(r.prop)}</td><td style="${B}"></td></tr>`).join('');
+ const cmp=R.elig.map((r,i)=>`<tr><td style="${C}">${i+1}</td><td style="${B}">${esc(r.u.fullName)}</td><td style="${C}">${f2(r.d.kpi)}</td><td style="${C}">${f2(r.d.total)}</td><td style="${C}">${r.d.over}/${r.d.n} (${Math.round(100*r.d.over/(r.d.n||1))}%)</td><td style="${B}">${esc(r.d.note||'')}</td><td style="${C}">${i+1}</td><td style="${B}">${R.chosen.has(r.u.id)?'Đề xuất HTXS':'HTT'}</td></tr>`).join('');
+ return WORD_HEAD('Phụ lục III')+`<p style="text-align:center"><b>PHỤ LỤC III<br>BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ, KIỂM SOÁT TỶ LỆ VÀ ĐỀ XUẤT XẾP LOẠI QUÝ III NĂM 2026</b></p><p>Phòng, đơn vị: Trường PTDTNT THCS & THPT Đắk Song${me.dept?' - '+esc(me.dept):''}</p>
+ <p><b>I. TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN</b></p><table style="width:100%;font-size:10pt"><tr>${['TT','Họ và tên','Chức vụ','Nhóm đối tượng tương đồng','Tổng số nhiệm vụ','Điểm KPI /70','Điểm tiêu chí chung /30','Tổng điểm /100','NV vượt yêu cầu','NV chậm/chưa hoàn thành','Mức cá nhân tự đề xuất','Mức đơn vị đề xuất','Ghi chú'].map(th).join('')}</tr>${tb}</table>
+ <p><b>II. KIỂM SOÁT TỶ LỆ “HOÀN THÀNH XUẤT SẮC NHIỆM VỤ”</b></p><table style="width:100%"><tr>${['Nhóm đối tượng tương đồng','Số cá nhân HTT','20% số cá nhân HTT','Số tối đa HTXS sau làm tròn','Số cá nhân đủ điều kiện HTXS','Số cá nhân đề xuất HTXS'].map(th).join('')}</tr><tr><td style="${B}">${esc(me.dept||'Toàn đơn vị')}</td><td style="${C}">${R.htt}</td><td style="${C}">${f2(R.htt*.2)}</td><td style="${C}">${R.quota}</td><td style="${C}">${R.elig.length}</td><td style="${C}">${R.chosen.size}</td></tr></table>
+ <p><b>III. DANH SÁCH SO SÁNH, LỰA CHỌN KHI SỐ CÁ NHÂN ĐỦ ĐIỀU KIỆN HTXS VƯỢT TỶ LỆ</b></p><table style="width:100%"><tr>${['TT','Họ và tên','KPI /70','Tổng điểm /100','Số/Tỷ lệ NV vượt yêu cầu','Sản phẩm nổi trội; hiệu quả, tác động; đổi mới sáng tạo','Thứ tự ưu tiên','Kết quả đề xuất'].map(th).join('')}</tr>${cmp||`<tr><td colspan="8" style="${B}">Chưa có cá nhân đủ điều kiện.</td></tr>`}</table><br>
+ <table style="width:100%;border:none;text-align:center"><tr><td><b>NGƯỜI LẬP BIỂU</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>TRƯỞNG PHÒNG/THỦ TRƯỞNG ĐƠN VỊ</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>XÁC NHẬN CỦA LÃNH ĐẠO PHỤ TRÁCH</b><br><i>(Ký, ghi rõ họ tên)</i></td></tr></table></body></html>`;
+}
+function preview(kind,dl){
+ if(kind==='II'){if(!viewUser||!tasks.length)return toast('Không có dữ liệu để xuất!','warning');prev={html:htmlII(viewUser,tasks,docInfo),name:'PhuLucII_'+viewUser.fullName.replace(/\s+/g,'_')+'.doc',mime:'application/msword',title:'Xem trước Phụ lục II - '+viewUser.fullName}}
+ else prev={html:htmlIII(),name:'PhuLucIII_TongHop.xls',mime:'application/vnd.ms-excel',title:'Xem trước Phụ lục III - Tổng hợp & kiểm soát tỷ lệ'};
+ if(dl)return downloadPrev();
+ $('prev-title').textContent=prev.title;$('prev-frame').srcdoc=prev.html.replace('<body>','<body style="padding:16px;background:#fff">');$('mprev').classList.remove('hide');
+}
+function downloadPrev(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff',prev.html],{type:prev.mime}));a.download=prev.name;document.body.appendChild(a);a.click();a.remove()}
+function printPrev(){const w=$('prev-frame').contentWindow;w.focus();w.print()}
 
-            tasks.forEach((task, index) => {
-                const baseScore = GROUP_SCORES[task.group] || 0;
-                const dateLogic = calculateDateLogic(task);
-                if (task.delayDays !== dateLogic.autoDelayDays) { task.delayDays = dateLogic.autoDelayDays; if(canEdit || task.completedDate) updateTaskInDB(task.id, { delayDays: task.delayDays }); }
-
-                const scoreA = baseScore * (task.completion / 100); const scoreB = Math.max(0, baseScore * (1 - (0.05 * task.errorCount))); const scoreC = Math.max(0, baseScore * (1 - (0.05 * task.delayDays)));
-                const actualScore = (scoreA + scoreB + scoreC) / 3;
-
-                let proofHTML = task.evidenceUrl ? `<a href="${task.evidenceUrl}" target="_blank" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold w-full flex justify-center hover:bg-blue-200 transition"><i class="fas fa-eye mr-1 mt-0.5"></i> Xem file</a>` : (canEdit && task.completedDate ? `<button onclick="uploadEvidence('${task.id}')" class="text-[10px] bg-slate-200 px-2 py-1 rounded font-bold w-full text-slate-700 hover:bg-slate-300 transition"><i class="fas fa-upload text-blue-600 mr-1"></i> Up file</button>` : `<span class="text-xs text-slate-400">---</span>`);
-                let actionHTML = !task.completedDate ? `<button onclick="markCompleted('${task.id}')" class="${canEdit?'bg-blue-100 text-blue-700 hover:bg-blue-200 transition border border-blue-200':'bg-slate-100 text-slate-300'} px-2 py-1 rounded text-[10px] font-bold w-full" ${!canEdit?'disabled':''}><i class="fas fa-check"></i> Xác nhận Xong</button>` : `<div class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-1 rounded text-center">Đã chốt: ${new Date(task.completedDate).toLocaleDateString('vi-VN')}</div>`;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="text-center font-bold text-slate-400">${index + 1}</td>
-                    <td><input list="task-templates" class="table-input font-semibold text-slate-700 ${!canEdit ? 'table-readonly' : ''}" value="${task.name}" onblur="updateTaskLocal('${task.id}', 'name', this.value)" ${!canEdit ? 'readonly' : ''} placeholder="Chọn mẫu hoặc gõ..."></td>
-                    <td><select class="table-input font-bold text-slate-700 ${!canEdit ? 'table-readonly' : ''}" onchange="updateTaskLocal('${task.id}', 'group', this.value)" ${!canEdit ? 'disabled' : ''}><option value="1" ${task.group==="1"?'selected':''}>Nhóm 1 (100)</option><option value="2" ${task.group==="2"?'selected':''}>Nhóm 2 (150)</option><option value="3" ${task.group==="3"?'selected':''}>Nhóm 3 (200)</option><option value="4" ${task.group==="4"?'selected':''}>Nhóm 4 (250)</option></select></td>
-                    <td class="text-center font-black text-amber-500 text-base bg-amber-50/20">${baseScore}</td>
-                    <td class="p-2 border-l border-slate-300 bg-slate-50/50"><div class="flex flex-col gap-1 items-center"><input type="date" class="table-input text-[11px] font-bold text-slate-700 p-1 ${!canEdit ? 'table-readonly' : ''}" value="${task.deadline}" onchange="updateTaskLocal('${task.id}', 'deadline', this.value)" ${!canEdit ? 'readonly' : ''}><div class="text-center">${dateLogic.html}</div></div></td>
-                    <td class="bg-slate-50/50 p-2 align-middle border-x border-slate-200"><div class="flex flex-col gap-1 w-full">${actionHTML}</div></td><td class="bg-slate-50/50 p-2 align-middle border-r border-slate-300 text-center"><div class="flex flex-col gap-1 w-full">${proofHTML}</div></td>
-                    <td class="bg-emerald-50/10 text-center font-bold text-red-500">${task.delayDays}</td>
-                    <td class="bg-emerald-50/10 border-r border-slate-300"><input type="number" class="table-input text-center text-red-600 font-bold ${!canDuyet ? 'table-readonly' : 'bg-yellow-50 focus:border-red-500'}" value="${task.errorCount}" min="0" onchange="updateTaskLocal('${task.id}', 'errorCount', this.value)" ${!canDuyet ? 'readonly' : ''}></td>
-                    <td id="actual-cell-${task.id}" class="text-center font-bold text-slate-600 bg-slate-50">${actualScore.toFixed(2)}</td><td id="kpi-cell-${task.id}" class="text-center font-black text-lg text-emerald-600 bg-emerald-50 shadow-inner">...</td>
-                    <td class="text-center"><button onclick="removeTask('${task.id}')" class="${canEdit ? 'text-slate-300 hover:text-red-500' : 'hidden'}"><i class="fas fa-trash-alt"></i></button></td>
-                `; tbody.appendChild(tr);
-            });
-            
-            const btn30Pts = document.getElementById('btn-open-30pts');
-            if(canDuyet || canEdit) { btn30Pts.disabled = false; btn30Pts.classList.remove('opacity-50', 'cursor-not-allowed'); } else { btn30Pts.disabled = true; btn30Pts.classList.add('opacity-50', 'cursor-not-allowed'); }
-
-            calculateTotal(); updateActionButtons();
-        }
-
-        function calculateTotal() {
-            let totalBase = 0; let totalActual = 0;
-            tasks.forEach(task => {
-                const baseScore = GROUP_SCORES[task.group] || 0; totalBase += baseScore;
-                const scoreA = baseScore * (task.completion / 100); const scoreB = Math.max(0, baseScore * (1 - (0.05 * task.errorCount))); const scoreC = Math.max(0, baseScore * (1 - (0.05 * task.delayDays)));
-                const actual = (scoreA + scoreB + scoreC) / 3; totalActual += actual;
-                const actCell = document.getElementById(`actual-cell-${task.id}`); if(actCell) actCell.textContent = actual.toFixed(2);
-            });
-
-            document.getElementById('total-base-score').textContent = totalBase;
-            let finalKpiScore = 0;
-            if (totalBase > 0) {
-                tasks.forEach(task => {
-                    const baseScore = GROUP_SCORES[task.group] || 0;
-                    const actualScore = ((baseScore * (task.completion / 100)) + Math.max(0, baseScore * (1 - (0.05 * task.errorCount))) + Math.max(0, baseScore * (1 - (0.05 * task.delayDays)))) / 3;
-                    const cell = document.getElementById(`kpi-cell-${task.id}`); if(cell) cell.textContent = ((actualScore / totalBase) * 70).toFixed(2);
-                });
-                finalKpiScore = (totalActual / totalBase) * 70;
-            }
-            document.getElementById('total-kpi-score').textContent = finalKpiScore.toFixed(2); document.getElementById('final-kpi-display').value = finalKpiScore.toFixed(2);
-            
-            const generalScore = parseFloat(document.getElementById('general-score').value) || 0;
-            const totalScore = (generalScore + finalKpiScore).toFixed(2); document.getElementById('final-total-score').textContent = totalScore;
-
-            const badge = document.getElementById('rating-badge'); const condition = document.getElementById('rating-condition');
-            if (totalScore >= 90) { badge.className = "px-8 py-5 rounded-2xl border-2 font-black text-2xl bg-blue-100 text-blue-800"; badge.textContent = "Hoàn thành Xuất sắc"; condition.textContent = "Lưu ý: BGH sẽ duyệt tỷ lệ 20% HTXS trong Tổ."; } 
-            else if (totalScore >= 70) { badge.className = "px-8 py-5 rounded-2xl border-2 font-black text-2xl bg-emerald-100 text-emerald-800"; badge.textContent = "Hoàn thành Tốt"; condition.textContent = "Đạt chỉ tiêu chất lượng và tiến độ."; } 
-            else if (totalScore >= 50) { badge.className = "px-8 py-5 rounded-2xl border-2 font-black text-2xl bg-amber-100 text-amber-800"; badge.textContent = "Hoàn thành Nhiệm vụ"; condition.textContent = "Cần cải thiện hiệu suất."; } 
-            else { badge.className = "px-8 py-5 rounded-2xl border-2 font-black text-2xl bg-red-100 text-red-800"; badge.textContent = "Không hoàn thành"; condition.textContent = "Tổng điểm <50đ. Vi phạm quy chế."; }
-        }
-
-        function open30PtsModal() {
-            document.getElementById('tc1').value = viewingDocInfo.tc1 ?? 5; document.getElementById('tc2').value = viewingDocInfo.tc2 ?? 5; document.getElementById('tc3').value = viewingDocInfo.tc3 ?? 10; document.getElementById('tc4').value = viewingDocInfo.tc4 ?? 10;
-            calc30Pts(); document.getElementById('modal-30pts').classList.remove('hidden');
-        }
-        function close30PtsModal() { document.getElementById('modal-30pts').classList.add('hidden'); }
-        function calc30Pts() {
-            let t1 = parseInt(document.getElementById('tc1').value) || 0; if(t1>5) t1=5; document.getElementById('tc1').value=t1;
-            let t2 = parseInt(document.getElementById('tc2').value) || 0; if(t2>5) t2=5; document.getElementById('tc2').value=t2;
-            let t3 = parseInt(document.getElementById('tc3').value) || 0; if(t3>10) t3=10; document.getElementById('tc3').value=t3;
-            let t4 = parseInt(document.getElementById('tc4').value) || 0; if(t4>10) t4=10; document.getElementById('tc4').value=t4;
-            document.getElementById('tc-total').textContent = t1+t2+t3+t4;
-        }
-        async function save30PtsToDB() {
-            const total = parseInt(document.getElementById('tc-total').textContent);
-            viewingDocInfo.tc1 = parseInt(document.getElementById('tc1').value); viewingDocInfo.tc2 = parseInt(document.getElementById('tc2').value);
-            viewingDocInfo.tc3 = parseInt(document.getElementById('tc3').value); viewingDocInfo.tc4 = parseInt(document.getElementById('tc4').value);
-            viewingDocInfo.generalScore = total;
-            try { await setDoc(doc(db, ...basePath, 'kpi_docs', viewingUserId), viewingDocInfo, {merge: true}); close30PtsModal(); calculateTotal(); showToast("Đã lưu điểm Tiêu chí chung!"); } catch(e){}
-        }
-
-        function updateActionButtons() {
-            const container = document.getElementById('action-container'); container.innerHTML = ''; if(!viewingUserId) return;
-            const status = viewingDocInfo.status;
-            if (currentUser.role === 'gv' && viewingUserId === currentUser.id) {
-                if (status === 'DRAFT') container.innerHTML = `<button onclick="changeDocStatus('PENDING_TT')" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black"><i class="fas fa-paper-plane text-blue-200"></i> NỘP PHIẾU CHO TỔ TRƯỞNG</button>`; 
-                else container.innerHTML = `<div class="bg-slate-100 text-slate-600 p-4 rounded-xl text-center font-bold"><i class="fas fa-lock mr-2"></i> Phiếu đã nộp chờ duyệt.</div>`;
-            } 
-            else if (currentUser.role === 'tt') {
-                if (status === 'PENDING_TT') container.innerHTML = `<button onclick="changeDocStatus('PENDING_BGH')" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-black"><i class="fas fa-check-double text-emerald-200"></i> TỔ TRƯỞNG DUYỆT & TRÌNH BGH</button><button onclick="changeDocStatus('DRAFT')" class="w-full bg-amber-100 text-amber-800 py-3 rounded-xl font-bold mt-2"><i class="fas fa-undo"></i> Trả lại cho Giáo viên sửa</button>`; 
-                else if (status === 'DRAFT') container.innerHTML = `<div class="text-amber-600 p-4 text-center font-bold"><i class="fas fa-user-edit mr-2"></i> Giáo viên đang tự chấm...</div>`; 
-                else container.innerHTML = `<div class="text-emerald-700 p-4 text-center font-bold bg-emerald-50 rounded-xl border border-emerald-200 shadow-sm"><i class="fas fa-check-circle mr-2"></i> Đã duyệt. Đang chờ BGH chốt.</div>`;
-            }
-            else if (currentUser.role === 'bgh') {
-                if (status === 'PENDING_BGH') container.innerHTML = `<button onclick="changeDocStatus('FINALIZED')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black"><i class="fas fa-stamp text-amber-500"></i> BGH CHỐT ĐIỂM CUỐI</button><button onclick="changeDocStatus('PENDING_TT')" class="w-full bg-amber-100 text-amber-800 py-3 rounded-xl font-bold mt-2"><i class="fas fa-undo"></i> Trả lại cho Tổ trưởng</button>`; 
-                else if (status === 'FINALIZED') container.innerHTML = `<div class="text-slate-800 p-5 text-center font-black bg-slate-200 rounded-2xl uppercase shadow-inner"><i class="fas fa-award text-amber-500 mr-2"></i> Hồ Sơ Đã Chốt</div>`; 
-                else container.innerHTML = `<div class="text-slate-400 p-4 text-center font-bold"><i class="fas fa-hourglass-half mr-2"></i> Chưa đến lượt BGH duyệt.</div>`;
-            }
-        }
-        async function changeDocStatus(newStatus) { if(confirm("Xác nhận thao tác?")) { await setDoc(doc(db, ...basePath, 'kpi_docs', viewingUserId), { status: newStatus }, {merge: true}); showToast("Cập nhật thành công!"); } }
-
-        function exportPhuLuc3Excel() { showToast("Tính năng xuất Excel Phụ lục III cần lấy toàn bộ dữ liệu Tổ. Sẽ có ở bản cập nhật nâng cao kế tiếp.", "info"); }
-
-        // XUẤT FILE WORD CHUẨN THỂ THỨC HÀNH CHÍNH
-        function exportWordReport() {
-            if(!viewingUserObj || tasks.length === 0) return showToast("Không có dữ liệu để xuất!", "warning");
-            showToast("Đang tạo file Word Phụ lục II chuẩn hành chính...", "info", true);
-
-            const today = new Date(); 
-            const dd = String(today.getDate()).padStart(2, '0'); 
-            const mm = String(today.getMonth() + 1).padStart(2, '0'); 
-            const yyyy = today.getFullYear();
-
-            let totalBase = 0; let totalActual = 0; let trRows = "";
-            
-            tasks.forEach((t, index) => {
-                const baseScore = GROUP_SCORES[t.group] || 0; totalBase += baseScore;
-                const scoreA = baseScore * (t.completion / 100);
-                const scoreB = Math.max(0, baseScore * (1 - (0.05 * t.errorCount)));
-                const scoreC = Math.max(0, baseScore * (1 - (0.05 * t.delayDays)));
-                const act = (scoreA + scoreB + scoreC) / 3; totalActual += act;
-                
-                trRows += `
-                    <tr>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${index + 1}</td>
-                        <td style="border: 1px solid black; padding: 5px;">${t.name}</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">Nhóm ${t.group}</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${baseScore}</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${t.completion}%</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${t.errorCount}</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">${t.delayDays}</td>
-                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${act.toFixed(2)}</td>
-                    </tr>`;
-            });
-
-            const kpiFinal = totalBase > 0 ? ((totalActual / totalBase) * 70).toFixed(2) : "0.00";
-            const genScore = viewingDocInfo.generalScore || 0;
-            const finalScore = (parseFloat(kpiFinal) + parseFloat(genScore)).toFixed(2);
-            const ratingText = document.getElementById('rating-badge').textContent;
-
-            let htmlContent = `
-                <table style="width:100%; border:none; font-family:'Times New Roman',serif; font-size:13pt; margin-bottom:20px;">
-                    <tr>
-                        <td style="text-align:center; width:45%; vertical-align:top;">
-                            SỞ GIÁO DỤC VÀ ĐÀO TẠO<br>
-                            <b>TRƯỜNG PTDTNT THCS & THPT<br>ĐẮK SONG</b><br>
-                            <hr style="width: 40%; border-top: 1px solid black; margin-top: 5px;">
-                        </td>
-                        <td style="text-align:center; width:55%; vertical-align:top;">
-                            <b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</b><br>
-                            <hr style="width: 40%; border-top: 1px solid black; margin-top: 5px;">
-                        </td>
-                    </tr>
-                </table>
-
-                <div style="text-align:center; font-family:'Times New Roman',serif; margin-bottom: 20px;">
-                    <div style="font-weight:bold; font-size:14pt; margin-bottom: 5px;">PHỤ LỤC II</div>
-                    <div style="font-weight:bold; font-size:15pt;">PHIẾU CHẤM ĐIỂM KPI VÀ TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN</div>
-                    <div style="font-style:italic; font-size:12pt; margin-top: 5px;">(Kèm theo Công văn số 5142/SGDĐT-TCCB ngày 30/9/2026 của Sở GDĐT)</div>
-                </div>
-                
-                <div style="font-size:13pt; font-family:'Times New Roman',serif; margin-bottom: 15px; line-height: 1.5;">
-                    - Họ và tên: <b>${viewingUserObj.fullName}</b><br>
-                    - Chức vụ, chức danh: ${viewingUserObj.jobTitle || 'Giáo viên'}<br>
-                    - Đơn vị công tác: ${viewingUserObj.dept}<br>
-                </div>
-
-                <div style="font-weight:bold; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:5px;">I. KẾT QUẢ THỰC HIỆN NHIỆM VỤ THEO KPI (Tối đa 70 điểm)</div>
-                <table style="width:100%; border-collapse:collapse; font-size:12pt; font-family:'Times New Roman',serif; margin-bottom:20px;">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">TT</th>
-                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Nhiệm vụ được giao</th>
-                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Phân nhóm</th>
-                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Điểm chuẩn</th>
-                            <th colspan="3" style="border: 1px solid black; padding: 5px;">Kết quả thực hiện</th>
-                            <th rowspan="2" style="border: 1px solid black; padding: 5px;">Điểm thực tế</th>
-                        </tr>
-                        <tr>
-                            <th style="border: 1px solid black; padding: 5px;">HT (%)</th>
-                            <th style="border: 1px solid black; padding: 5px;">Số lần sửa</th>
-                            <th style="border: 1px solid black; padding: 5px;">Trễ (ngày)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${trRows}
-                        <tr>
-                            <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold; padding: 5px;">TỔNG CỘNG ĐIỂM CHUẨN:</td>
-                            <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${totalBase}</td>
-                            <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold; padding: 5px;">ĐIỂM KPI QUY ĐỔI (Tối đa 70đ):</td>
-                            <td style="border: 1px solid black; text-align: center; font-weight: bold; font-size: 14pt; padding: 5px;">${kpiFinal}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div style="font-weight:bold; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:5px;">II. TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ CÁ NHÂN</div>
-                <table style="width:100%; border-collapse:collapse; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:20px;">
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px; font-weight: bold; text-align: center;">Nội dung</td>
-                        <td style="border: 1px solid black; padding: 5px; width: 20%; font-weight: bold; text-align: center;">Điểm tối đa</td>
-                        <td style="border: 1px solid black; padding: 5px; width: 20%; font-weight: bold; text-align: center;">Điểm đạt được</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px;">1. Nhóm tiêu chí chung theo quy định của Đảng</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">30</td>
-                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${genScore}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 5px;">2. Kết quả thực hiện nhiệm vụ theo KPI (Mục I)</td>
-                        <td style="border: 1px solid black; text-align: center; padding: 5px;">70</td>
-                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">${kpiFinal}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; font-weight: bold; padding: 5px;">TỔNG ĐIỂM CÁ NHÂN TỰ ĐÁNH GIÁ</td>
-                        <td style="border: 1px solid black; text-align: center; font-weight: bold; padding: 5px;">100</td>
-                        <td style="border: 1px solid black; text-align: center; font-weight: bold; font-size: 15pt; padding: 5px;">${finalScore}</td>
-                    </tr>
-                </table>
-
-                <div style="font-weight:bold; font-size:13pt; font-family:'Times New Roman',serif; margin-bottom:5px;">III. TỰ ĐỀ XUẤT MỨC XẾP LOẠI</div>
-                <div style="font-size:13pt; font-family:'Times New Roman',serif; margin-bottom: 30px;">
-                    - Mức tự xếp loại chất lượng: <b>${ratingText}</b>.
-                </div>
-
-                <table style="width:100%; border:none; font-family:'Times New Roman',serif; font-size:13pt; page-break-inside: avoid;">
-                    <tr>
-                        <td style="width:33%; text-align:center; vertical-align:top;">
-                            <b style="display:block; margin-bottom: 5px;">XÁC NHẬN CỦA LÃNH ĐẠO</b>
-                            <i style="font-size: 12pt;">(Ký, ghi rõ họ tên)</i>
-                        </td>
-                        <td style="width:33%; text-align:center; vertical-align:top;">
-                            <b style="display:block; margin-bottom: 5px;">TỔ TRƯỞNG CHUYÊN MÔN</b>
-                            <i style="font-size: 12pt;">(Ký, ghi rõ họ tên)</i>
-                        </td>
-                        <td style="width:34%; text-align:center; vertical-align:top;">
-                            <i style="font-size: 12pt;">Đắk Song, ngày ${dd} tháng ${mm} năm ${yyyy}</i><br>
-                            <b style="display:block; margin-top: 5px; margin-bottom: 5px;">NGƯỜI TỰ ĐÁNH GIÁ</b>
-                            <i style="font-size: 12pt;">(Ký, ghi rõ họ tên)</i>
-                            <br><br><br><br><br>
-                            <b>${viewingUserObj.fullName}</b>
-                        </td>
-                    </tr>
-                </table>
-            `;
-
-            var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><title>Phụ lục II</title><style>@page WordSection1 { size: 595.3pt 841.9pt; margin: 56.7pt 56.7pt 56.7pt 70.9pt; mso-header-margin: 35.4pt; mso-footer-margin: 35.4pt; mso-paper-source: 0; } div.WordSection1 { page: WordSection1; }</style></head><body><div class='WordSection1'>";
-            var footer = "</div></body></html>";
-            var sourceHTML = header + htmlContent + footer;
-
-            var blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
-            var link = document.createElement("a"); link.href = URL.createObjectURL(blob); 
-            link.download = `PhuLucII_${viewingUserObj.fullName.replace(/ /g, '_')}.doc`; 
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            document.querySelectorAll('.toast').forEach(t => t.remove());
-        }
-
-        // ==========================================
-        // QUẢN TRỊ USER VÀ PHÒNG BAN
-        // ==========================================
-        function renderDepartments() {
-            const container = document.getElementById('dept-list-container');
-            if(container) {
-                container.innerHTML = '';
-                if(departments.length === 0) container.innerHTML = '<div class="text-slate-400 italic text-sm py-2">Chưa có Tổ nào được tạo.</div>';
-                else departments.forEach(d => { container.innerHTML += `<span class="bg-white text-emerald-800 border border-emerald-200 shadow-sm px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">${d} <i class="fas fa-times-circle cursor-pointer text-red-300 hover:text-red-500 ml-1 text-base" onclick="removeDepartment('${d}')"></i></span>`; });
-            }
-            const select = document.getElementById('user-dept');
-            if(select) {
-                const currentVal = select.value; select.innerHTML = '<option value="">-- Chọn Tổ / Bộ phận --</option>';
-                departments.forEach(d => { select.innerHTML += `<option value="${d}">${d}</option>`; });
-                if(departments.includes(currentVal)) select.value = currentVal;
-            }
-        }
-        async function addDepartment() {
-            if(currentUser?.role !== 'admin') return;
-            const input = document.getElementById('new-dept-name'); const val = input.value.trim();
-            if(!val) return showToast("Vui lòng nhập tên Tổ!", "warning");
-            if(departments.includes(val)) return showToast("Tổ này đã tồn tại!", "error");
-            const newList = [...departments, val];
-            try { await setDoc(doc(db, ...basePath, 'config', 'departments'), { list: newList }); input.value = ''; showToast("Đã thêm Tổ mới!"); } catch(e) { showToast("Lỗi khi thêm!", "error"); }
-        }
-        async function removeDepartment(name) {
-            if(currentUser?.role !== 'admin') return;
-            if(confirm(`Xóa tổ: ${name}?`)) {
-                const newList = departments.filter(d => d !== name);
-                try { await setDoc(doc(db, ...basePath, 'config', 'departments'), { list: newList }); showToast("Đã xóa Tổ!"); } catch(e) { showToast("Lỗi khi xóa!", "error"); }
-            }
-        }
-
-        function renderUsersTable() {
-            const tbody = document.getElementById('users-table-body'); if(!tbody) return; tbody.innerHTML = '';
-            allUsers.forEach(u => {
-                let rBadge = u.role==='admin' ? '<span class="badge bg-slate-800 text-white">Admin</span>' : (u.role==='bgh' ? '<span class="badge bg-indigo-100 text-indigo-800">BGH</span>' : (u.role==='tt' ? '<span class="badge bg-amber-100 text-amber-800">Tổ trưởng</span>' : '<span class="badge bg-blue-100 text-blue-800">Giáo viên</span>'));
-                tbody.innerHTML += `<tr class="border-b border-slate-100"><td class="p-4 font-bold text-slate-800">${u.fullName} <span class="block text-xs text-slate-500">${u.jobTitle || ''}</span></td><td class="p-4 font-mono text-blue-600 bg-blue-50/30">${u.username} <span class="text-slate-400 text-xs block mt-1"><i class="fas fa-key"></i> ${u.password}</span></td><td class="p-4">${rBadge} <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded ml-1 border border-emerald-100">${u.dept}</span></td><td class="p-4 text-xs font-semibold text-slate-500">${u.email || '---'}</td><td class="p-4 text-center"><button onclick="editUser('${u.id}')" class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg transition"><i class="fas fa-edit"></i></button> <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition ml-1"><i class="fas fa-trash"></i></button></td></tr>`;
-            });
-        }
-        async function saveUser(e) {
-            e.preventDefault(); const id = document.getElementById('edit-user-id').value || 'u_' + Date.now();
-            const data = { id: id, fullName: document.getElementById('user-fullname').value.trim(), jobTitle: document.getElementById('user-job-title').value.trim(), role: document.getElementById('user-role').value, dept: document.getElementById('user-dept').value, username: document.getElementById('user-username').value.trim(), password: document.getElementById('user-password').value.trim(), email: document.getElementById('user-email').value.trim() };
-            if(data.role !== 'admin' && !data.dept) return showToast("Vui lòng chọn Tổ!", "warning");
-            try { await setDoc(doc(db, ...basePath, 'users', id), data); showToast("Đã lưu tài khoản!"); resetUserForm(); } catch(err) { showToast("Lỗi!", "error"); }
-        }
-        function editUser(id) {
-            const u = allUsers.find(x => x.id === id); if(!u) return;
-            document.getElementById('edit-user-id').value = u.id; document.getElementById('user-fullname').value = u.fullName; document.getElementById('user-job-title').value = u.jobTitle || ''; document.getElementById('user-role').value = u.role; document.getElementById('user-dept').value = u.dept || ''; document.getElementById('user-username').value = u.username; document.getElementById('user-password').value = u.password; document.getElementById('user-email').value = u.email || '';
-        }
-        async function deleteUser(id) { if(confirm("Xóa người dùng này?")) { try { await deleteDoc(doc(db, ...basePath, 'users', id)); showToast("Đã xóa"); } catch(e) { showToast("Lỗi", "error"); } } }
-        function resetUserForm() { document.getElementById('user-form').reset(); document.getElementById('edit-user-id').value = ''; }
-    </script>
+/* ================= QUẢN TRỊ ================= */
+function renderDepts(){const l=$('dept-list');if(!l)return;l.innerHTML=depts.map(d=>`<span class="bg-white text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl text-sm font-bold">${esc(d)} <i class="fas fa-times-circle text-red-300 hover:text-red-500 cursor-pointer" onclick="delDept(${JSON.stringify(d).replace(/"/g,'&quot;')})"></i></span>`).join('');
+ $('e-dept').innerHTML='<option value="">-- Chọn Tổ --</option>'+depts.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('')}
+async function addDept(){if(me?.role!=='admin')return;const v=$('new-dept').value.trim();if(!v||depts.includes(v))return toast('Tên tổ trống hoặc đã tồn tại!','warning');await dref('config','departments').set({list:[...depts,v]});$('new-dept').value=''}
+async function delDept(n){if(me?.role==='admin'&&confirm('Xóa tổ '+n+'?'))await dref('config','departments').set({list:depts.filter(d=>d!==n)})}
+function renderUsers(){$('user-body').innerHTML=users.map(u=>`<tr><td class="p-2 font-bold">${esc(u.fullName)}<span class="block text-xs text-slate-500">${esc(u.jobTitle||'')}</span></td><td class="p-2 font-mono">${esc(u.username)}</td><td class="p-2">${esc({admin:'Admin',bgh:'BGH',tt:'Tổ trưởng',gv:'Giáo viên'}[u.role]||u.role)} · ${esc(u.dept||'')}</td><td class="p-2 text-center"><button onclick="editUser('${u.id}')" class="text-blue-500 p-2"><i class="fas fa-edit"></i></button><button onclick="delUser('${u.id}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
+async function saveUser(e){e.preventDefault();const id=$('e-id').value||'u_'+Date.now(),old=users.find(u=>u.id===id);
+ const d={fullName:$('e-name').value.trim(),jobTitle:$('e-job').value.trim(),role:$('e-role').value,dept:$('e-dept').value,username:$('e-user').value.trim()};
+ if(d.role!=='admin'&&!d.dept)return toast('Vui lòng chọn Tổ!','warning');
+ if(users.some(u=>u.id!==id&&(u.username||'').toLowerCase()===d.username.toLowerCase()))return toast('Tên đăng nhập đã tồn tại!','error');
+ const p=$('e-pass').value;if(p)d.passHash=await sha(p);else if(!old)return toast('Nhập mật khẩu cho tài khoản mới!','warning');
+ await dref('users',id).set(d,{merge:true});toast('Đã lưu tài khoản!');$('user-form').reset();$('e-id').value=''}
+function editUser(id){const u=users.find(x=>x.id===id);if(!u)return;$('e-id').value=id;$('e-name').value=u.fullName;$('e-job').value=u.jobTitle||'';$('e-role').value=u.role;$('e-dept').value=u.dept||'';$('e-user').value=u.username;$('e-pass').value=''}
+async function delUser(id){if(id===me.id)return toast('Không thể xóa chính mình!','warning');if(confirm('Xóa người dùng này?'))await dref('users',id).delete()}
+</script>
 </body>
 </html>
