@@ -167,7 +167,7 @@ td{border:1px solid #e2e8f0;padding:5px;vertical-align:middle}
      <input id="e-job" required class="ti" placeholder="Chức vụ (VD: Giáo viên, Phó Hiệu trưởng)">
      <select id="e-role" class="ti"><option value="gv">Giáo viên / Nhân viên</option><option value="tt">Tổ trưởng</option><option value="bgh">Ban Giám Hiệu</option><option value="tk">Thư ký / Văn thư (chỉ xem tổng hợp)</option><option value="admin">Quản trị viên</option></select>
      <select id="e-dept" class="ti"></select>
-     <!-- TRƯỜNG MANAGER VỪA ĐƯỢC THÊM VÀO ĐÂY -->
+     <!-- TRƯỜNG MANAGER -->
      <select id="e-manager" class="ti" title="Người duyệt trực tiếp (bỏ trống nếu là Hiệu trưởng/Admin)"></select>
      <input id="e-user" class="hide">
      <input id="e-email" type="email" required class="ti md:col-span-2" placeholder="Email Google đăng nhập">
@@ -295,11 +295,9 @@ function enterApp(){$('u-name').textContent=me.fullName;$('u-role').textContent=
 const isHT=u=>(u.jobTitle||'').toLowerCase().includes('hiệu trưởng')&&!(u.jobTitle||'').toLowerCase().includes('phó');
 function subordinates(){ 
  if(me.role==='tk')return users.filter(u=>u.id!==me.id&&u.role!=='admin');
- if(me.role==='admin' || me.role==='bgh') return users.filter(u=>u.id!==me.id&&u.role!=='admin'); // BGH thấy hết
- // Nếu là người duyệt trực tiếp của ai đó
+ if(me.role==='admin' || me.role==='bgh') return users.filter(u=>u.id!==me.id&&u.role!=='admin');
  const direct = users.filter(u => u.managerId === me.id);
  if (direct.length > 0) return direct;
- // Dữ phòng tổ trưởng nếu chưa phân managerId
  if(me.role==='tt')return users.filter(u=>u.dept===me.dept&&u.role==='gv');
  return[];
 }
@@ -336,10 +334,10 @@ async function addTask(e){e.preventDefault();if(cur.status==='locked')return toa
  try{await cref('kpi_tasks').add(mkTask(uid,{axis:+$('r-axis').value,name:$('r-name').value.trim(),group:$('r-group').value,product:$('r-product').value.trim(),qty:$('r-qty').value.trim(),deadline:$('r-deadline').value}));
  ['r-name','r-product','r-qty','r-deadline'].forEach(i=>$(i).value='');toast(uid===me.id?'Đã đăng ký vào Phụ lục II của bạn!':'Đã giao việc!')}catch(x){toast('Lỗi!','error')}}
 
-/* ================= TÍNH ĐIỂM (THEO CONFIG ĐỘNG CỦA KỲ) ================= */
+/* ================= TÍNH ĐIỂM (THEO CONFIG ĐỘNG) ================= */
 function calc(ts){
  let base=0,act=0;
- const cf = cur.config; // Lấy config từ kỳ hiện tại
+ const cf = cur.config;
  const rows=ts.map(t=>{const b=cf.baseGroups[t.group]||100,A=b*Math.min(100,t.completion??100)/100,B=Math.max(0,b*(1-cf.errorDeduct*(t.errorCount||0))),d=delayOf(t),C=Math.max(0,b*(1-cf.lateDeduct*d)),a=(A+B+C)/3;base+=b;act+=a;return{t,b,A,B,C,d,a}});
  const ax={};rows.forEach(r=>{const x=ax[r.t.axis]=ax[r.t.axis]||{b:0,a:0};x.b+=r.b;x.a+=r.a});
  Object.values(ax).forEach(x=>{x.max=base?cf.kpiRatio*x.b/base:0;x.kpi=x.b?x.a/x.b*x.max:0;x.pct=x.b?x.a/x.b:0});
@@ -381,7 +379,7 @@ function render(){
    <td>${inp(t,'completion',p.edit||p.mgr,'number','text-center')}</td>
    <td>${inp(t,'errorCount',p.edit||p.mgr,'number','text-center text-red-600')}</td>
    <td class="text-center">${chk(t,'exceed',p.edit||p.mgr)}</td>
-   <td class="text-center" title="Chậm do khách quan/bất khả kháng có xác nhận: không trừ điểm">${chk(t,'objective',p.edit||p.mgr)}</td>
+   <td class="text-center" title="Chậm do khách quan có xác nhận">${chk(t,'objective',p.edit||p.mgr)}</td>
    <td class="text-center font-bold text-red-500">${r.d}</td>
    <td class="text-center font-bold" title="A=${f2(r.A)} | B=${f2(r.B)} | C=${f2(r.C)}">${f2(r.a)}</td>
    <td class="text-center font-black text-emerald-600 bg-emerald-50">${f2(r.kpi)}</td>
@@ -393,7 +391,7 @@ function render(){
  const cls={X:'bg-sky-100 text-sky-800 border-sky-300',T:'bg-emerald-100 text-emerald-800 border-emerald-300',H:'bg-amber-100 text-amber-800 border-amber-300',K:'bg-red-100 text-red-800 border-red-300'}[rt.k];
  $('s-rating').className='mx-auto my-3 px-6 py-4 rounded-2xl border-2 font-black text-xl text-center '+cls;$('s-rating').textContent=RATE[rt.k];
  const cond=[[c.allDone&&c.n>0,'Hoàn thành 100% nhiệm vụ'],[c.onTime,'Không trễ tiến độ do chủ quan'],[c.over30,`≥${cur.config.exceedThreshold*100}% nhiệm vụ vượt mức (${c.over}/${c.n})`],[!!(docInfo.note||'').trim(),'Có mô tả sản phẩm nổi trội'],[total>=90,'Tổng điểm ≥ 90']];
- $('s-cond').innerHTML='<li class="font-bold text-slate-500">Điều kiện "Hoàn thành xuất sắc":</li>'+cond.map(x=>`<li class="${x[0]?'text-emerald-600':'text-red-500'}"><i class="fas fa-${x[0]?'check':'times'}-circle"></i> ${x[1]}</li>`).join('');
+ $('s-cond').innerHTML='<li class="font-bold text-slate-500">Điều kiện HTXS:</li>'+cond.map(x=>`<li class="${x[0]?'text-emerald-600':'text-red-500'}"><i class="fas fa-${x[0]?'check':'times'}-circle"></i> ${x[1]}</li>`).join('');
  $('btn-30').disabled=!(p.edit||p.mgr);$('btn-30').classList.toggle('opacity-50',$('btn-30').disabled);
  actions();
  persist(c,rate(total,c,docInfo.note),total);
@@ -463,7 +461,7 @@ function renderReports(){
  $('rep-body').innerHTML=R.rows.map((r,i)=>`<tr><td class="text-center">${i+1}</td><td class="font-bold">${esc(r.u.fullName)}</td><td class="text-xs">${esc(r.u.jobTitle||'GV')} - ${esc(r.u.dept||'')}</td><td><span class="bd ${ST[r.d.status||'DRAFT'][1]}">${ST[r.d.status||'DRAFT'][0]}</span></td><td class="text-center">${r.d.n||0}</td><td class="text-center font-bold text-emerald-600">${f2(r.d.kpi)}</td><td class="text-center">${r.d.generalScore ?? cur.config.generalRatio}</td><td class="text-center font-black text-amber-600">${f2(r.d.total)}</td><td class="text-center">${r.d.over||0}</td><td class="text-center">${r.d.late||0}</td><td class="text-xs">${esc(r.d.rating||'---')}</td><td class="text-xs font-bold ${r.prop===RATE.X?'text-sky-700':''}">${esc(r.prop)}</td></tr>`).join('')||'<tr><td colspan="12" class="text-center py-6 text-slate-400">Không có cấp dưới.</td></tr>';
 }
 
-/* ================= QUẢN TRỊ ================= */
+/* ================= QUẢN TRỊ VÀ TÀI KHOẢN ================= */
 function renderDepts(){const l=$('dept-list');if(!l)return;l.innerHTML=depts.map(d=>`<span class="bg-white text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl text-sm font-bold">${esc(d)} <i class="fas fa-times-circle text-red-300 hover:text-red-500 cursor-pointer" onclick="delDept(${JSON.stringify(d).replace(/"/g,'&quot;')})"></i></span>`).join('');
  $('e-dept').innerHTML='<option value="">-- Chọn Tổ --</option>'+depts.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('')}
 async function addDept(){if(me?.role!=='admin')return;const v=$('new-dept').value.trim();if(!v||depts.includes(v))return toast('Tên tổ trống hoặc đã tồn tại!','warning');await dref('config','departments').set({list:[...depts,v]});$('new-dept').value=''}
@@ -482,53 +480,83 @@ async function savePerm(r,k,v){perms={...perms,[r]:{...(perms[r]||{}),[k]:v?1:0}
 async function loadAudit(){const b=$('audit-body');if(!b)return;try{const s=await cref('audit_logs').orderBy('at','desc').limit(100).get();
  b.innerHTML=s.docs.map(d=>{const x=d.data(),t=users.find(u=>u.id===x.target);return`<tr class="border-b"><td class="p-1 whitespace-nowrap">${new Date(x.at).toLocaleString('vi-VN')}</td><td class="p-1 font-bold">${esc(x.byName)}</td><td class="p-1">${esc(x.action)}${t?' · '+esc(t.fullName):''}</td><td class="p-1 text-slate-500">${esc(x.detail)}</td></tr>`}).join('')||'<tr><td class="p-2 text-slate-400">Chưa có thao tác nào.</td></tr>'}catch(e){b.innerHTML='<tr><td class="p-2 text-red-500">Không đọc được nhật ký: '+esc(e.message)+'</td></tr>'}}
 
-function renderUsers(){
- const mgrs = users.filter(u => ['tt', 'bgh', 'admin'].includes(u.role));
- if($('e-manager'))$('e-manager').innerHTML = '<option value="">-- Quản lý trực tiếp (Bỏ trống nếu là BGH) --</option>' + mgrs.map(m => `<option value="${m.id}">${esc(m.fullName)} (${esc(ROLES[m.role])})</option>`).join('');
+function renderUsers() {
+    const mgrs = users.filter(u => ['tt', 'bgh', 'admin'].includes(u.role));
+    const selectMgr = $('e-manager');
+    if(selectMgr) {
+        selectMgr.innerHTML = '<option value="">-- Quản lý trực tiếp (Bỏ trống nếu là BGH) --</option>' + mgrs.map(m => `<option value="${m.id}">${esc(m.fullName)} (${esc(ROLES[m.role])})</option>`).join('');
+    }
 
- $('user-body').innerHTML=users.map(u=>{
-  const mgr = users.find(x => x.id === u.managerId);
-  return `<tr>
-   <td class="p-2 font-bold">${esc(u.fullName)}<span class="block text-xs text-slate-500">${esc(u.jobTitle||'')}</span></td>
-   <td class="p-2 font-mono text-xs">${esc(u.email||'(chưa có email)')}</td>
-   <td class="p-2 text-xs">${esc(ROLES[u.role]||u.role)} · ${esc(u.dept||'')}
-    <div class="text-sky-700 font-bold mt-1">Duyệt bởi: ${mgr ? esc(mgr.fullName) : '---'}</div>
-   </td>
-   <td class="p-2 text-center whitespace-nowrap"><button onclick="editUser('${u.id}')" class="text-blue-500 p-2"><i class="fas fa-edit"></i></button><button onclick="delUser('${u.id}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button></td>
-  </tr>`
- }).join('')
+    $('user-body').innerHTML = users.map(u => {
+        const mgr = users.find(x => x.id === u.managerId);
+        return `<tr>
+            <td class="p-2 font-bold">${esc(u.fullName)}<span class="block text-xs text-slate-500">${esc(u.jobTitle||'')}</span></td>
+            <td class="p-2 font-mono text-xs">${esc(u.email||'(chưa có email)')}</td>
+            <td class="p-2 text-xs">${esc(ROLES[u.role]||u.role)} · ${esc(u.dept||'')}
+                <div class="text-sky-700 font-bold mt-1">Duyệt bởi: ${mgr ? esc(mgr.fullName) : '---'}</div>
+            </td>
+            <td class="p-2 text-center whitespace-nowrap">
+                <button onclick="editUser('${u.id}')" class="text-blue-500 p-2"><i class="fas fa-edit"></i></button>
+                <button onclick="delUser('${u.id}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
 }
 
-async function saveUser(e){
- e.preventDefault();
- const id=$('e-id').value\vert{}\vert{}'u_'+Date.now(), old=users.find(u=>u.id===id), email=$('e-email').value.trim().toLowerCase();
- const d={
-  fullName: $('e-name').value.trim(), 
-  jobTitle: $('e-job').value.trim(), 
-  role: $('e-role').value, 
-  dept: $('e-dept').value, 
-  managerId: $('e-manager') ?$('e-manager').value : null,
-  email
- };
- if(d.role!=='admin'&&!d.dept)return toast('Vui lòng chọn Tổ!','warning');
- if(users.some(u=>u.id!==id&&(u.email||'').toLowerCase()===email))return toast('Email đã được dùng!','error');
- try{
-  await dref('users',id).set(d,{merge:true});
-  await dref('emails',email).set({userId:id,role:d.role,dept:d.dept});
-  if(old?.email&&old.email.toLowerCase()!==email)await dref('emails',old.email.toLowerCase()).delete();
-  log('Lưu tài khoản',d.fullName+' ('+d.role+')');toast('Đã lưu tài khoản!');$('user-form').reset();$('e-id').value='';
- }catch(x){toast('Lỗi: '+x.message,'error')}
+async function saveUser(e) {
+    e.preventDefault();
+    const id = $('e-id').value || 'u_' + Date.now();
+    const old = users.find(u => u.id === id);
+    const email = $('e-email').value.trim().toLowerCase();
+    
+    const d = {
+        fullName: $('e-name').value.trim(), 
+        jobTitle: $('e-job').value.trim(), 
+        role: $('e-role').value, 
+        dept: $('e-dept').value, 
+        managerId: $('e-manager') ?$('e-manager').value : null,
+        email: email
+    };
+    
+    if(d.role !== 'admin' && !d.dept) return toast('Vui lòng chọn Tổ!', 'warning');
+    if(users.some(u => u.id !== id && (u.email||'').toLowerCase() === email)) return toast('Email đã được dùng!', 'error');
+    
+    try {
+        await dref('users', id).set(d, {merge: true});
+        await dref('emails', email).set({userId: id, role: d.role, dept: d.dept});
+        if(old?.email && old.email.toLowerCase() !== email) {
+            await dref('emails', old.email.toLowerCase()).delete();
+        }
+        log('Lưu tài khoản', d.fullName + ' (' + d.role + ')');
+        toast('Đã lưu tài khoản!');
+        $('user-form').reset();$('e-id').value = '';
+    } catch(x) {
+        toast('Lỗi: ' + x.message, 'error');
+    }
 }
 
-function editUser(id){
- const u=users.find(x=>x.id===id);if(!u)return;
- $('e-id').value=id; $('e-name').value=u.fullName; $('e-job').value=u.jobTitle\vert{}\vert{}'';$('e-role').value=u.role; $('e-dept').value=u.dept\vert{}\vert{}'';$('e-email').value=u.email||'';
- if($('e-manager'))$('e-manager').value = u.managerId || '';
+function editUser(id) {
+    const u = users.find(x => x.id === id);
+    if(!u) return;
+    $('e-id').value = id; 
+    $('e-name').value = u.fullName; 
+    $('e-job').value = u.jobTitle \vert{}\vert{} '';$('e-role').value = u.role; 
+    $('e-dept').value = u.dept \vert{}\vert{} '';$('e-email').value = u.email || '';
+    if($('e-manager'))$('e-manager').value = u.managerId || '';
 }
 
-async function delUser(id){if(id===me.id)return toast('Không thể xóa chính mình!','warning');{const u=users.find(x=>x.id===id);if(u&&confirm('Xóa người dùng này?')){if(u.email)await dref('emails',u.email.toLowerCase()).delete();await dref('users',id).delete();log('Xóa tài khoản',u.fullName)}}}
+async function delUser(id) {
+    if(id === me.id) return toast('Không thể xóa chính mình!', 'warning');
+    if(confirm('Xóa người dùng này?')) {
+        const u = users.find(x => x.id === id);
+        if(u) {
+            if(u.email) await dref('emails', u.email.toLowerCase()).delete();
+            await dref('users', id).delete();
+            log('Xóa tài khoản', u.fullName);
+        }
+    }
+}
 
-// Tạm ẩn tính năng Preview/In do đang tái cấu trúc Word Head
 function preview(){ alert("Tính năng xuất file đang được nâng cấp trong Giai đoạn 3."); }
 </script>
 </body>
