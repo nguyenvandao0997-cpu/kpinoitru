@@ -255,7 +255,12 @@ function newDoc(){
 
 const BOOT_ADMIN='nguyenvandao0997@gmail.com'; 
 let started=false;
-const googleLogin=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>toast('Lỗi đăng nhập: '+e.message,'error'));
+
+// Đổi sang signInWithRedirect để tránh bị chặn trình duyệt
+const googleLogin = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithRedirect(provider).catch(e => toast('Lỗi đăng nhập: ' + e.message, 'error'));
+};
 
 auth.onAuthStateChanged(async u=>{
  if(!u)return;
@@ -447,7 +452,7 @@ async function upd(id,f,el){
  try{await cref('kpi_tasks').doc(id).update({[f]:v})}catch(e){toast('Lỗi lưu!','error')}
 }
 async function addBlank(){if(!perm().edit)return;await cref('kpi_tasks').add(mkTask(viewUid))}
-async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}
+async function delTask(id){if(!perm().edit)return toast('Phiếu đã nộp/chốt, không thể xóa!','warning');if(confirm('Xóa nhiệm vụ này?'))try{await cref('kpi_tasks').doc(id).delete();toast('Đã xóa!')}catch(e){toast('Lỗi!','error')}}
 async function saveNote(v){await kset(viewUid,{note:v})}
 
 async function upload(id){
@@ -467,7 +472,7 @@ function open30(){
 }
 function tcRead(){const d={};cur.config.tc30Template.forEach(t=>d[t.id]=Math.max(0,parseInt($('tcv_'+t.id).value)||0));return d}
 function calc30(){const d=tcRead(),r=tcScore(d);
- cur.config.tc30Template.forEach(t=>{const v=d[t.id];$('tcv_'+t.id).value=v;$('tcs_'+t.id).textContent=Math.max(0,t.maxScore-v);const o=$('tcok_'+t.id);o.textContent=v?'Không đảm bảo':'Đảm bảo';o.className='bd ml-2 '+(v?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700')});
+ cur.config.tc30Template.forEach(t=>{const v=d[t.id];$('tcv_'+t.id).value=v;$('tcs_'+t.id).textContent=Math.max(0,t.maxScore-v);const o=$('tcok_'+t.id);o.textContent=v?'Không đảm bảo':'Ensured';o.className='bd ml-2 '+(v?'bg-red-100 text-red-700':'bg-emerald-100 text-emerald-700')});
  $('tc-total').textContent=`${r.s} / ${cur.config.generalRatio}`;$('tc-extra').textContent=r.x;
 }
 async function save30(){
